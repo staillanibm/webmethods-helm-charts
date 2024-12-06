@@ -1,4 +1,4 @@
-# Helm Chart Repository for Software AG webMethods Products and Components
+# Helm Chart Repository for IBM webMethods Products and Components
 
 This repository contains a collection of Helm charts for various webMethods components. The section *Available Charts* provides more information about the contents. We test and develop all Helm Charts for webMethods release version 10.15.
 
@@ -29,12 +29,12 @@ Each chart has a README for *how to use* and lists some prerequisites.
 
 | Chart Name | Description |
 | --- | --- |
-| [apigateway](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/apigateway/helm/README.md) | API Gateway |
-| [developerportal](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/developerportal/helm/README.md) | webMethods Developer Portal |
-| [microservicesruntime](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/microservicesruntime/helm/README.md) | Microservices Runtime (MSR) |
-| [mywebmethodsserver](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/mywebmethodsserver/helm/README.md) | My webMethods Server (MWS) |
-| [universalmessaging](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/universalmessaging/helm/README.md) | Universal Messaging (UM) |
-| [terracottabigmemorymax](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/terracottabigmemorymax/helm/README.md) | Terracotta BigMemoryMax |
+| [apigateway](https://github.com/IBM/webmethods-helm-charts/blob/main/apigateway/helm/README.md) | API Gateway |
+| [developerportal](https://github.com/IBM/webmethods-helm-charts/blob/main/developerportal/helm/README.md) | webMethods Developer Portal |
+| [microservicesruntime](https://github.com/IBM/webmethods-helm-charts/blob/main/microservicesruntime/helm/README.md) | Microservices Runtime (MSR) |
+| [mywebmethodsserver](https://github.com/IBM/webmethods-helm-charts/blob/main/mywebmethodsserver/helm/README.md) | My webMethods Server (MWS) |
+| [universalmessaging](https://github.com/IBM/webmethods-helm-charts/blob/main/universalmessaging/helm/README.md) | Universal Messaging (UM) |
+| [terracottabigmemorymax](https://github.com/IBM/webmethods-helm-charts/blob/main/terracottabigmemorymax/helm/README.md) | Terracotta BigMemoryMax |
 
 ## Chart Versions
 
@@ -46,10 +46,10 @@ To adopt Microservices Runtime for your deployment and environment or to build i
 
 | Utility | Description |
 | --- | --- |
-| [image-builder-dcc](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/utils/image-builder-dcc/README.md) | Script to create Image for Database Component Configurator (DCC) |
-| [PostgreSQL](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/utils/postgresql/README.md) | Information to deploy a PostgreSQL database |
-| [BPM Demo](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/utils/bpm-demo/README.md) | BPM scenarios to deploy MSR as Process Engine |
-| [Image Builder using Azure DevOps](https://github.com/SoftwareAG/webmethods-helm-charts/blob/main/utils/image-builder-using-azure-devops/README.md) | webMethods Image builder using Azure DevOps pipelines |
+| [image-builder-dcc](https://github.com/IBM/webmethods-helm-charts/blob/main/utils/image-builder-dcc/README.md) | Script to create Image for Database Component Configurator (DCC) |
+| [PostgreSQL](https://github.com/IBM/webmethods-helm-charts/blob/main/utils/postgresql/README.md) | Information to deploy a PostgreSQL database |
+| [BPM Demo](https://github.com/IBM/webmethods-helm-charts/blob/main/utils/bpm-demo/README.md) | BPM scenarios to deploy MSR as Process Engine |
+| [Image Builder using Azure DevOps](https://github.com/IBM/webmethods-helm-charts/blob/main/utils/image-builder-using-azure-devops/README.md) | webMethods Image builder using Azure DevOps pipelines |
 
 ## Contributing
 
