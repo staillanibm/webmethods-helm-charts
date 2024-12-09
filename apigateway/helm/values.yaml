@@ -5,9 +5,9 @@ revisionHistoryLimit: 10
 
 image:
   # -- The repository for the image. By default,
-  # this points to the Software AG container repository.
+  # this points to the IBM webMethods container repository.
   # Change this for air-gapped installations or custom images.
-  # For the Software AG container repository you need to have a
+  # For the IBM webMethods container repository you need to have a
   # valid access token stored as registry credentials
   repository: sagcr.azurecr.io/apigateway-minimal
   pullPolicy: IfNotPresent
@@ -501,8 +501,8 @@ metering:
   # *debug - logs ERROR, WARN, INFO, and DEBUG messages. Use as a Java system property or an environment variable to see the debug messages of the configuration initialization.
   logLevel:
   # -- The absolute path to the metering client truststore that is used for HTTPS connections. Add this value in any of the following cases:
-  # *If you use the Software AG Metering Server on premises (via HTTPS) and the certificates in the truststore do not match the certificates configured in Software AG Runtime (CTP).
-  # *If you use a metering proxy that terminates the SSL connection to the Metering Server in Software AG Cloud.
+  # *If you use the IBM webMethods Metering Server on premises (via HTTPS) and the certificates in the truststore do not match the certificates configured in IBM webMethods Runtime (CTP).
+  # *If you use a metering proxy that terminates the SSL connection to the Metering Server in IBM webMethods.io Cloud.
   trustStoreFile:
   # -- The password for the metering client truststore.
   # Configure this property only if you use a truststore.

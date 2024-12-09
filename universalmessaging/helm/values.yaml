@@ -7,7 +7,7 @@ replicaCount: 1
 
 # -- Run this image
 image:
-  # -- Pull this image. Default is UM from [Software AG Container Registry](https://containers.softwareag.com)
+  # -- Pull this image. Default is UM from [IBM webMethods Container Registry](https://containers.webmethods.io)
   repository: sagcr.azurecr.io/universalmessaging-server
   # -- Pull with policy
   pullPolicy: Always

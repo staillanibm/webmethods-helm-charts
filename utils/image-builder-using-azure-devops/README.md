@@ -6,7 +6,7 @@ This project provides 3 Azure pipelines to create Docker images for webMethods c
 
 ![Architecture Components](pics/architecture.png)
 
-The Software AG installer is used and called to create images. After creation, the image will be pushed to a remote Docker registry. This can be e.g. Harbor or Azure Container Registry so that Kubernetes can pulled from there.
+The IBM webMethods installer is used and called to create images. After creation, the image will be pushed to a remote Docker registry. This can be e.g. Harbor or Azure Container Registry so that Kubernetes can pulled from there.
 
 There are 3 pipelines available and each uses the Installer to create the image in another way.
 

@@ -2,9 +2,9 @@ replicaCount: 1
 
 image:
   # -- The repository for the image. By default, 
-  # this points to the Software AG container repository. 
+  # this points to the IBM webMethods container repository. 
   # Change this for air-gapped installations or custom images.
-  # For the Software AG container repository you need to have a 
+  # For the IBM webMethods container repository you need to have a 
   # valid access token stored as registry credentials
   repository: sagcr.azurecr.io/devportal
   pullPolicy: IfNotPresent

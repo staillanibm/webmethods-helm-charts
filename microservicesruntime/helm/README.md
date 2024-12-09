@@ -6,7 +6,7 @@ This Helm Chart installs and configures a Microservices Runtime (MSR) container.
 
 ### Image Pull Secret
 
-If you want to pull image from [Software AG Containers Registry](https://containers.softwareag.com), create secret with your Software AG Containers Registry credentials ...
+If you want to pull image from [IBM webMethods Containers Registry](https://containers.webmethods.io), create secret with your IBM webMethods Containers Registry credentials ...
 
 ```
 kubectl create secret docker-registry regcred --docker-server=sagcr.azurecr.io --docker-username=<your-name> --docker-password=<your-pwd> --docker-email=<your-email>
@@ -22,7 +22,7 @@ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheu
 
 ### Create Image for Microservices Runtime
 
-The default is to pull the image from Software AG Containers Registry `sagcr.azurecr.io/webmethods-microservicesruntime`.
+The default is to pull the image from IBM webMethods Containers Registry `sagcr.azurecr.io/webmethods-microservicesruntime`.
 
 If you need to create an own image with additional webMethods product components, you can use the utility [image-creator-using-Azure-DevOps](../../utils/image-creator-using-azure-devops/README.md). On starting the pipeline, you can define a list of product components. You should set in field `List of product components ...` the value `MSC,PIEContainerExternalRDBMS` (as minimum) to create an image with product Microservices Runtime and Database Drivers to connect external databases.
 
@@ -135,7 +135,7 @@ helm install wm-msr webmethods/microservicesruntime   \
 | extraVolumes | list | `[]` | Exta volumes that should be mounted. |
 | fullnameOverride | string | `""` | Overwrites full workload name. As default, the workload name is release name + '-' + Chart name. |
 | image.pullPolicy | string | `"IfNotPresent"` | Pull with policy |
-| image.repository | string | `"sagcr.azurecr.io/webmethods-microservicesruntime"` | Pull this image. Default is MSR from [Software AG Container Registry](https://containers.softwareag.com) |
+| image.repository | string | `"sagcr.azurecr.io/webmethods-microservicesruntime"` | Pull this image. Default is MSR from [IBM webMethods Container Registry](https://containers.webmethods.io) |
 | image.tag | string | `"10.15"` | The default value pulls latest. In PROD it is recommended to use a specific fix level. |
 | imagePullSecrets | list | `[{"name":"regcred"}]` | Image pull secret reference. By default looks for `regcred`. |
 | ingress.annotations | object | `{}` |  |
@@ -162,7 +162,7 @@ helm install wm-msr webmethods/microservicesruntime   \
 | metering.serverConnectTimeout | string | `"60000"` | The time in milliseconds to establish the initial TCP connection when the metering client calls the server REST endpoint. This is also the time to start the request. |
 | metering.serverReadTimeout | string | `"300000"` | The maximum time in milliseconds without data transfer over the TCP connection to the server. This is also the time that it takes for the server to respond. When this time passes, the request fails. |
 | metering.serverUrl | string | `"https://metering.softwareag.cloud/api/measurements"` | The URL of the metering aggregator server REST API. |
-| metering.trustStoreFile | string | `nil` | The absolute path to the metering client truststore that is used for HTTPS connections. Add this value in any of the following cases: *If you use the Software AG Metering Server on premises (via HTTPS) and the certificates in the truststore do not match the certificates configured in Software AG Runtime (CTP). *If you use a metering proxy that terminates the SSL connection to the Metering Server in Software AG Cloud. |
+| metering.trustStoreFile | string | `nil` | The absolute path to the metering client truststore that is used for HTTPS connections. Add this value in any of the following cases: *If you use the IBM webMethods Metering Server on premises (via HTTPS) and the certificates in the truststore do not match the certificates configured in IBM webMethods Runtime (CTP). *If you use a metering proxy that terminates the SSL connection to the Metering Server in IBM webMethods Cloud. |
 | metering.trustStorePassword | string | `nil` | The password for the metering client truststore. Configure this property only if you use a truststore. |
 | metering.trustStorePasswordFromSecret | object | `{"enabled":false,"secretKey":"","secretName":""}` | Configuration for secretKeyRef containing the password for the metering client truststore. Configure this property only if you use a truststore. Mutually exclusive with providing the password directly over metering.trustStorePassword. |
 | metering.trustStorePasswordFromSecret.enabled | bool | `false` | enable secretKeyRef instead of providing password directly |

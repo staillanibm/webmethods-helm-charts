@@ -6,7 +6,7 @@ This Helm Chart installs and configures a Universal Messaging (UM) container.
 
 ### Image Pull Secret
 
-If you want to pull image from Software AG Containers Registry, create secret with your Software AG Containers Registry credentials ...
+If you want to pull image from IBM webMethods Containers Registry, create secret with your IBM webMethods Containers Registry credentials ...
 
 ```
 kubectl create secret docker-registry regcred --docker-server=sagcr.azurecr.io --docker-username=<your-name> --docker-password=<your-pwd> --docker-email=<your-email>
@@ -85,7 +85,7 @@ helm install um webmethods/universalmessaging
 | fullnameOverride | string | `""` | Overwrites full workload name. As default, the workload name is release name + '-' + Chart name. |
 | image | object | `{"pullPolicy":"Always","repository":"sagcr.azurecr.io/universalmessaging-server","tag":"10.15"}` | Run this image |
 | image.pullPolicy | string | `"Always"` | Pull with policy |
-| image.repository | string | `"sagcr.azurecr.io/universalmessaging-server"` | Pull this image. Default is UM from [Software AG Container Registry](https://containers.softwareag.com) |
+| image.repository | string | `"sagcr.azurecr.io/universalmessaging-server"` | Pull this image. Default is UM from [IBM webMethods Container Registry](https://containers.webmethods.io) |
 | image.tag | string | `"10.15"` | The default value pulls latest. In PROD it is recommended to use a specific fix level. |
 | imagePullSecrets | list | `[{"name":"regcred"}]` | Image pull secret reference. By default looks for `regcred`. |
 | ingress.annotations | object | `{}` |  |

@@ -14,7 +14,7 @@ The [Job template](../../helm/templates/job.yaml) is used to create a Kubernetes
 
 ## Values
 
-Following [values](./values-deploy-assets-to-um.yaml) create a Kubernetes job to deploy UM assets. The `sagcr.azurecr.io/universalmessaging-tools:10.15` image from [containers registry](https://containers.softwareag.com) is used to create JNDI connection factory. Inside the container, the tool [runUMTool.sh](https://documentation.softwareag.com/universal_messaging/num10-15/webhelp/num-webhelp/index.html#page/num-webhelp%2Fco-clu_standard_administration_tasks.html%23) is called.
+Following [values](./values-deploy-assets-to-um.yaml) create a Kubernetes job to deploy UM assets. The `sagcr.azurecr.io/universalmessaging-tools:10.15` image from [containers registry](https://containers.webmethods.io) is used to create JNDI connection factory. Inside the container, the tool [runUMTool.sh](https://documentation.softwareag.com/universal_messaging/num10-15/webhelp/num-webhelp/index.html#page/num-webhelp%2Fco-clu_standard_administration_tasks.html%23) is called.
 
 You must change the environment variable `UM_HOST` with the UM deployment name.
 

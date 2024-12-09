@@ -1,7 +1,7 @@
 # -- The repository for the image. By default,
-# this points to the Software AG container repository.
+# this points to the IBM webMethodscontainer repository.
 # Change this for air-gaped installations or custom images.
-# For the Software AG container repository you need to have a
+# For the IBM webMethods container repository you need to have a
 # valid access token stored as registry credentials
 registry: sagcr.azurecr.io
 serverImage: bigmemorymax-server

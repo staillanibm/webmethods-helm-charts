@@ -7,7 +7,7 @@ replicaCount: 1
 statefulSet: false
 
 image:
-  # -- Pull this image. Default is MSR from [Software AG Container Registry](https://containers.softwareag.com)
+  # -- Pull this image. Default is MSR from [IBM webMethods Container Registry](https://containers.webmethods.io)
   repository: "sagcr.azurecr.io/webmethods-microservicesruntime"
   # -- Pull with policy
   pullPolicy: IfNotPresent
@@ -334,8 +334,8 @@ metering:
   # *debug - logs ERROR, WARN, INFO, and DEBUG messages. Use as a Java system property or an environment variable to see the debug messages of the configuration initialization.
   logLevel:
   # -- The absolute path to the metering client truststore that is used for HTTPS connections. Add this value in any of the following cases:
-  # *If you use the Software AG Metering Server on premises (via HTTPS) and the certificates in the truststore do not match the certificates configured in Software AG Runtime (CTP).
-  # *If you use a metering proxy that terminates the SSL connection to the Metering Server in Software AG Cloud.
+  # *If you use the IBM webMethods Metering Server on premises (via HTTPS) and the certificates in the truststore do not match the certificates configured in IBM webMethods Runtime (CTP).
+  # *If you use a metering proxy that terminates the SSL connection to the Metering Server in IBM webMethods Cloud.
   trustStoreFile:
   # -- The password for the metering client truststore.
   # Configure this property only if you use a truststore.

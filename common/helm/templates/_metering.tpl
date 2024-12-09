@@ -1,5 +1,5 @@
 {{/*
-Generate metering environment entries for Software AG products.
+Generate metering environment entries for IBM webMethods products.
 
 Usage:
 {{ include "common.metering.envs" }}

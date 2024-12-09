@@ -29,7 +29,7 @@ For more information please see: https://www.elastic.co/guide/en/cloud-on-k8s/cu
 
 ### Image Pull Secret
 
-If you want to pull image from [Software AG Containers Registry](https://containers.softwareag.com), create secret with your Software AG Containers Registry credentials ...
+If you want to pull image from [IBM webMethods Containers Registry](https://containers.webmethods.io), create secret with your IBM webMethods Containers Registry credentials ...
 
 ```
 kubectl create secret docker-registry regcred --docker-server=sagcr.azurecr.io --docker-username=<your-name> --docker-password=<your-pwd> --docker-email=<your-email>
@@ -94,7 +94,7 @@ helm install webmethods/developerportal devportal
 | extraVolumes | list | `[]` | Exta volumes that should be mounted. |
 | fullnameOverride | string | `""` | Overwrites full workload name. As default, the workload name is release name + '-' + Chart name. |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"sagcr.azurecr.io/devportal"` | The repository for the image. By default,  this points to the Software AG container repository.  Change this for air-gapped installations or custom images. For the Software AG container repository you need to have a  valid access token stored as registry credentials |
+| image.repository | string | `"sagcr.azurecr.io/devportal"` | The repository for the image. By default,  this points to the IBM webMethods container repository.  Change this for air-gapped installations or custom images. For the IBM webMethods container repository you need to have a  valid access token stored as registry credentials |
 | image.tag | string | `"10.15"` | The image tag of the apigateway image default this will be the latest version.  For realworld scenarios SAG recommends to use a  specific version to not accidently change production versions with newer images. |
 | imagePullSecrets | list | `[{"name":"regcred"}]` | Image pull secret reference. By default looks for `regcred`. |
 | ingress.annotations | object | `{"nginx.ingress.kubernetes.io/affinity":"cookie","nginx.ingress.kubernetes.io/app-root":"/portal","traefik.ingress.kubernetes.io/affinity":"true","traefik.ingress.kubernetes.io/app-root":"/portal"}` | Ingress annotations |

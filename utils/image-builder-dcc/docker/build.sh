@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Validate latest Software AG Installer version on Empower ...
+# Validate latest IBM webMethods Installer version on Empower ...
 INSTALLER_VERSION=20230725
 
 curl https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller${INSTALLER_VERSION}-Linux_x86_64.bin --output installer.bin

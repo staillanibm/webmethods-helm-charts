@@ -22,7 +22,7 @@ annotations:
 apiVersion: v2
 # Please make sure that version and appVersion are always the same.
 appVersion: 1.0.0
-description: A Library Helm Chart for grouping common logic between Software AG charts. This chart is not deployable by itself.
+description: A Library Helm Chart for grouping common logic between IBM webMethods charts. This chart is not deployable by itself.
 home: https://softwareag.com
 icon: https://softwareag.com/downloads/logos/softwareag-mark.png
 keywords:

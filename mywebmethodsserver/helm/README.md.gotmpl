@@ -6,7 +6,7 @@ This Helm Chart installs and configures a MyWebMethods Server (MWS) container. I
 
 ### Create Image for MyWebMethods Server
 
-Software AG does not offer currently ready-made container images for MyWebMethods Server. Therefore you will need to create an image on your own. You can follow the instructions
+IBM webMethods does not offer currently ready-made container images for MyWebMethods Server. Therefore you will need to create an image on your own. You can follow the instructions
 from the build directory of this repository here: [building My webMethods Server Image](../examples/image-builder/README.md).
 
 ## Examples for Use-cases

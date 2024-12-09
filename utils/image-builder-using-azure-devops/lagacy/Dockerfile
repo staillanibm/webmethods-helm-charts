@@ -18,7 +18,7 @@ ARG PRODUCTS
 #   apt-get upgrade                            -y && \
 #   apt-get install curl                       -y
 
-# Install Software AG Installer ...
+# Install IBM webMethods Installer ...
 RUN \
   curl \
     https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller${INSTALLER_VERSION}-Linux_x86_64.bin \
@@ -31,7 +31,7 @@ RUN useradd -ms /bin/bash sagadmin
 RUN mkdir          /opt/softwareag
 RUN chown sagadmin /opt/softwareag
 
-# Create script for Software AG Installer ...
+# Create script for IBM webMethods Installer ...
 RUN \
     echo "ServerURL=https\://sdc-hq.softwareag.com/cgi-bin/dataservewebM`echo ${RELEASE} | sed "s/\.//g"`.cgi"            > installer.script && \
     echo "selectedFixes=spro\:all"                                                                                       >> installer.script && \
