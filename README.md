@@ -7,7 +7,7 @@ This repository contains a collection of Helm charts for various webMethods comp
 To add this Helm chart repository to your Helm CLI, run the following command:
 
 ```shell
-helm repo add webmethods https://open-source.softwareag.com/webmethods-helm-charts/charts
+helm repo add webmethods https://ibm.github.io/webmethods-helm-charts/charts
 ```
 
 To list the content of repository, type `helm search repo webmethods`
