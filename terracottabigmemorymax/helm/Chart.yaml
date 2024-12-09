@@ -1,5 +1,5 @@
 # /*
-#  * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or its licensors
+#  * Copyright (c) 2024 IBM Corporation
 #  *
 #  * SPDX-License-Identifier: Apache-2.0
 #  *
@@ -42,7 +42,7 @@ appVersion: "4.4.0"
 
 dependencies:
 - name: common
-  repository: "https://open-source.softwareag.com/webmethods-helm-charts/charts"
+  repository: "https://ibm.github.io/webmethods-helm-charts/charts"
   tags:
     - softwareag-common
   version: 1.0.3

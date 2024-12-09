@@ -1,6 +1,6 @@
 dependencies:
 - name: common
-  repository: https://open-source.softwareag.com/webmethods-helm-charts/charts
+  repository: https://ibm.github.io/webmethods-helm-charts/charts
   version: 1.0.3
 - name: prometheus-elasticsearch-exporter
   repository: https://prometheus-community.github.io/helm-charts

@@ -1,5 +1,5 @@
 # /*
-#  * Copyright (c) 2023 Software AG, Darmstadt, Germany and/or its licensors
+#  * Copyright (c) 2024 IBM Corporation
 #  *
 #  * SPDX-License-Identifier: Apache-2.0
 #  *

@@ -53,7 +53,7 @@ jobs:
           mkdir -p                            webmethods-helm-charts/charts
           cp    *.tgz                         webmethods-helm-charts/charts
           cd                                  webmethods-helm-charts/charts
-          helm repo index . --url https://open-source.softwareag.com/webmethods-helm-charts/charts
+          helm repo index . --url https://ibm.github.io/webmethods-helm-charts/charts
           git add .
           git commit -am "${{ github.event.head_commit.message }}"
           git branch -M      gh-pages
