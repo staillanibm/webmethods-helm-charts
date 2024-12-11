@@ -1,8 +1,8 @@
+[!UNDER CONSTRUCTION! PLEASE DO NOT USE!]
+
 # Helm Chart Repository for IBM webMethods Products and Components
 
 This repository contains a collection of Helm charts for various webMethods components. The section *Available Charts* provides more information about the contents. We test and develop all Helm Charts for webMethods release version 10.15.
-
-# UNDER CONSTRUCTION! PLEASE DO NOT USE!
 
 ## Adding the Helm Chart Repository
 
