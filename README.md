@@ -2,7 +2,7 @@
 
 This repository contains a collection of Helm charts for various webMethods components. The section *Available Charts* provides more information about the contents. We test and develop all Helm Charts for webMethods release version 10.15.
 
-# Under construction! Please do not use until officially released!
+# UNDER CONSTRUCTION! PLEASE DO NOT USE!
 
 ## Adding the Helm Chart Repository
 
