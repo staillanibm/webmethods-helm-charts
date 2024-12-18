@@ -45,12 +45,14 @@ jobs:
           helm package -u terracottabigmemorymax/helm
 
       - name: Push Helm Charts to this GitHub repo branch 'gh-pages' 
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pwd 
           ls -la
           git config --global user.name  "${{ github.event.head_commit.committer.name  }}"
           git config --global user.email "${{ github.event.head_commit.committer.email }}"
-          git clone git@github.com:IBM/webmethods-helm-charts.git -b gh-pages
+          git clone --depth 1 https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} -b gh-pages
           cp    *.md                          webmethods-helm-charts/
           mkdir -p                            webmethods-helm-charts/charts
           cp    *.tgz                         webmethods-helm-charts/charts
