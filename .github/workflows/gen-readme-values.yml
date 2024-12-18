@@ -3,7 +3,8 @@ name: Regenerate Helm README Documentation
 on:
   push:
     branches-ignore:
-      - main                     # Run on all not 'main' branches
+      - main 
+      - gh-pages # Run on all not 'main' and 'gh-pages' branches
     paths:
       - '**/helm/values.yaml'         # Only if values.yaml or ... 
       - '**/helm/README.md.gotmpl'    #     ... README.md.gotmpl is pushed
