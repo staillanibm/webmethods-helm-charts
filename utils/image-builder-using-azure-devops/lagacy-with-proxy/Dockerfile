@@ -24,7 +24,7 @@ RUN \
   curl \
     https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller${INSTALLER_VERSION}-Linux_x86_64.bin \
     --proxy "${PROXY}" \
-    -v -o installer.bin
+    -o installer.bin
 
 # Create user ...
 RUN useradd -ms /bin/bash sagadmin
