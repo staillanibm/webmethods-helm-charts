@@ -4,7 +4,6 @@
 parameters:
 - name: JOB_NAME
   displayName: 'Job name'
-  default: 'wm-msr#10.15'
 - name: TAG
   displayName: Tag the created image with this name, e.g. wm-msr:10.15
   default: 'wm-msr:10.15'
@@ -48,26 +47,15 @@ steps:
     docker login -u '$(REGISTRY_USERNAME)' -p '$(REGISTRY_PASSWORD)' $(REGISTRY_HOST)
   displayName: 'Login Docker registry'
 
-- script: |
-    echo 'Download Installer from Empower by release date: $(INSTALLER_VERSION)'
-    curl https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller$(INSTALLER_VERSION)-Linux_x86_64.bin -o installer.bin
-  displayName: 'Download Installer from Empower'
-
-- script: |
-    echo '$(EMPOWER_PASSWORD)' > pass.txt
-    sh installer.bin create container-image --name '${{parameters.TAG}}' --release '${{parameters.RELEASE}}' --accept-license --products '${{parameters.PRODUCTS}}' --username '$(EMPOWER_USERNAME)' --password:file=pass.txt --admin-password '${{parameters.ADMIN_PASSWORD}}' --base-image '${{parameters.BASE_IMAGE}}' 
-    rm pass.txt
-  displayName: 'Start Installer to create image'
-
 - script:
-    find . -name "installLog.txt" | xargs cat
-  displayName: 'Print out Installer log'
+    docker build --no-cache --build-arg 'BASE_IMAGE=${{parameters.BASE_IMAGE}}'  --build-arg 'EMPOWER_USERNAME=$(EMPOWER_USERNAME)' --build-arg 'EMPOWER_PASSWORD=$(EMPOWER_PASSWORD)' --build-arg 'INSTALLER_VERSION=$(INSTALLER_VERSION)' --build-arg 'RELEASE=${{parameters.RELEASE}}' --build-arg 'ADMIN_PASSWORD=${{parameters.ADMIN_PASSWORD}}' --build-arg 'PRODUCTS=${{parameters.PRODUCTS}}' --build-arg 'PROXY=$(PROXY)' -t ${{parameters.TAG}} utils/image-builder-using-azure-devops/lagacy-with-proxy
+  displayName: 'Build Docker image'
 
 - script: |
     echo 'Push image $(REGISTRY_HOST)/$(REGISTRY_PROJECT)/${{parameters.TAG}} ...'
     docker tag '${{parameters.TAG}}' '$(REGISTRY_HOST)/$(REGISTRY_PROJECT)/${{parameters.TAG}}'
     docker push '$(REGISTRY_HOST)/$(REGISTRY_PROJECT)/${{parameters.TAG}}'
-  displayName: 'Push image to Docker registry'
+  displayName: 'Push image to public Docker registry'
 
 - script:
     docker rmi '${{parameters.TAG}}' '$(REGISTRY_HOST)/$(REGISTRY_PROJECT)/${{parameters.TAG}}'
