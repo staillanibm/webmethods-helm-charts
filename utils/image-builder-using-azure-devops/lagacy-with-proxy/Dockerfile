@@ -41,7 +41,7 @@ RUN \
     echo "InstallDir=/opt/softwareag"                                                                                    >> installer.script && \
     echo "adminPassword=${ADMIN_PASSWORD}"                                                                               >> installer.script && \
     echo "Username=${EMPOWER_USERNAME}"                                                                                  >> installer.script && \
-    echo "Password=${EMPOWER_PASSWORD}"                                                                                  >> installer.script &&
+    echo "Password=${EMPOWER_PASSWORD}"                                                                                  >> installer.script && \
     echo "proxy=${PROXY}"                                                                                                >> installer.script
 
 RUN echo 'Debug Installer script: ' && echo && cat installer.script
