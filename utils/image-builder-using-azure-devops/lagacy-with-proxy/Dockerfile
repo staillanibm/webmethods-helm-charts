@@ -42,7 +42,8 @@ RUN \
     echo "adminPassword=${ADMIN_PASSWORD}"                                                                               >> installer.script && \
     echo "Username=${EMPOWER_USERNAME}"                                                                                  >> installer.script && \
     echo "Password=${EMPOWER_PASSWORD}"                                                                                  >> installer.script && \
-    echo "proxy=${PROXY}"                                                                                                >> installer.script
+    echo "ProxyHttpHost=`echo "${PROXY}" | awk -F'[[:space:]="/:]+' '{print $2}'`"                                       >> installer.script && \
+    echo "ProxyHttpPort=`echo "${PROXY}" | awk -F'[[:space:]="/:]+' '{print $3}'`"                                       >> installer.script
 
 RUN echo 'Debug Installer script: ' && echo && cat installer.script
 
