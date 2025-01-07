@@ -23,7 +23,7 @@ ARG PROXY
 RUN \
   curl \
     https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller${INSTALLER_VERSION}-Linux_x86_64.bin \
-    --proxy '$(PROXY)' \
+    --proxy "$(PROXY)" \
     -o installer.bin
 
 # Create user ...
@@ -48,7 +48,7 @@ RUN echo 'Debug Installer script: ' && echo && cat installer.script
 # Install software ...
 #   and Change user context to ...
 USER sagadmin
-RUN sh installer.bin -readScript installer.script -console --proxy '$(PROXY)'
+RUN sh installer.bin -readScript installer.script -console --proxy "$(PROXY)"
 RUN echo 'Debug installation log ...' && echo && find . -name "installLog.txt" | xargs cat
 
 # Cleanup ...
