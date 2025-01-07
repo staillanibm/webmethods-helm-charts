@@ -41,14 +41,15 @@ RUN \
     echo "InstallDir=/opt/softwareag"                                                                                    >> installer.script && \
     echo "adminPassword=${ADMIN_PASSWORD}"                                                                               >> installer.script && \
     echo "Username=${EMPOWER_USERNAME}"                                                                                  >> installer.script && \
-    echo "Password=${EMPOWER_PASSWORD}"                                                                                  >> installer.script
+    echo "Password=${EMPOWER_PASSWORD}"                                                                                  >> installer.script &&
+    echo "proxy=${PROXY}"                                                                                                >> installer.script
 
 RUN echo 'Debug Installer script: ' && echo && cat installer.script
 
 # Install software ...
 #   and Change user context to ...
 USER sagadmin
-RUN sh installer.bin -readScript installer.script -console --proxy "${PROXY}"
+RUN sh installer.bin -readScript installer.script -console
 RUN echo 'Debug installation log ...' && echo && find . -name "installLog.txt" | xargs cat
 
 # Cleanup ...
