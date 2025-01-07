@@ -46,7 +46,7 @@ The running pipeline needs additional parameters which are passed as Variable Gr
 * `REGISTRY_HOST`: Hostname of remote Docker registry
 * `REGISTRY_PROJECT`: Project or sub-folder where the image is pushed. At the end, the image is pushed to `${REGISTRY_HOST}/${REGISTRY_PROJECT}/${TAG}`.
 * `AGENT_POOL`: Default is `wm-image-builder`. The running pipeline use the Agent Pool to address the registered agent for executing the pipeline.
-* `PROXY`: The Installer is called with this proxy option to download software though HTTP proxy.
+* `PROXY`: The Installer is called with this proxy option to download software though HTTP proxy. Use the URL syntax `protocol://host:port` as value.
 
 **Tip:** If you plan to have multiple environments to build images, add the environment name to Variable Group name. The Variable Group name is requested on starting the pipeline.
 
