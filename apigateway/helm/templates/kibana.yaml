@@ -27,6 +27,9 @@ spec:
   {{- end }}
   version: {{ .Values.kibana.version }}
   count: {{ .Values.kibana.count }}
+  {{- if .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- end }}
   config:
     xpack.security.authc.providers:
       anonymous.anonymous1:
@@ -86,9 +89,6 @@ spec:
         {{ toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.revisionHistoryLimit }}
-      revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
-      {{- end }}
       {{- with .Values.kibana.affinity }}
       affinity:
         {{- tpl (toYaml .) $context  | nindent 8 }}
