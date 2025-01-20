@@ -25,7 +25,7 @@ serviceAccount:
 # -- Extra Labels
 extraLabels: {}
 
-# -- Exta environment properties to be passed on to the MyWebMethods Server
+# -- Exta environment properties to be passed on to the My webMethods Server
 #  - name: extraEnvironmentVariable
 #    value: "myvalue"
 extraEnvs: {}
@@ -40,6 +40,9 @@ extraEnvs: {}
 #        resources:
 #          requests:
 #            storage: 10
+extraVolumes: []
+
+# -- Extra volume claim template to be passed on to the My webMethods Server
 extraVolumeClaimTemplates: []
 
 # -- Extra volume mounts
