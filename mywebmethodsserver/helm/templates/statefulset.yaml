@@ -114,10 +114,7 @@ spec:
             value: {{ .Values.storage.dirs.logsdir.path }}/{{ .Values.storage.dirs.logsdir.subPath }}
           {{- end }}
           {{- if .Values.extraEnvs }}
-          {{- range $key, $val := .Values.extraEnvs }}
-          - name: {{ $key }}
-            value: {{ $val }}
-          {{- end }}
+          {{- toYaml .Values.extraEnvs | nindent 10 }}
           {{- end }}                
           {{- if .Values.lifecycle }}
           lifecycle:
