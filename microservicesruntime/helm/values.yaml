@@ -30,14 +30,14 @@ containerName:
 extraLabels: {}
 
 # -- Exta volumes that should be mounted.
-extraVolumes: []
 # - name: extras
 #   emptyDir: {}
+extraVolumes: []
 
-# -- Exta environment properties to be passed on to the microservice runtime
-extraEnvs: []
+# -- Exta environment properties to be passed on to the Microservices Runtime
 #  - name: extraEnvironmentVariable
 #    value: "myvalue"
+extraEnvs: []
 
 # -- Extra Ports to be defined, note: these ports need to be created 
 extraPorts: []
