@@ -127,12 +127,12 @@ helm install wm-msr webmethods/microservicesruntime   \
 | extraCommand | string | `""` | Extra command, which is executed before the startContainer entrypoint script of the Microservice Runtime |
 | extraConfigMaps | list | `[]` | Extra config maps for addtional configurations such as extra ports, etc. |
 | extraContainers | list | `[]` | Extra containers which should run in addtion to the main container as a sidecar - name: do-something   image: busybox   command: ['do', 'something'] |
-| extraEnvs | list | `[]` | Exta environment properties to be passed on to the microservice runtime |
+| extraEnvs | list | `[]` | Extra environment properties to be passed on to the Microservices Runtime  - name: extraEnvironmentVariable    value: "myvalue" |
 | extraInitContainers | list | `[]` | Extra init containers that are executed before starting the main container - name: do-something   image: busybox   command: ['do', 'something'] |
 | extraLabels | object | `{}` | Extra Labels |
 | extraPorts | list | `[]` | Extra Ports to be defined, note: these ports need to be created  |
 | extraVolumeMounts | list | `[]` | Extra volume mounts |
-| extraVolumes | list | `[]` | Exta volumes that should be mounted. |
+| extraVolumes | list | `[]` | Extra volumes that should be mounted. - name: extras   emptyDir: {} |
 | fullnameOverride | string | `""` | Overwrites full workload name. As default, the workload name is release name + '-' + Chart name. |
 | image.pullPolicy | string | `"IfNotPresent"` | Pull with policy |
 | image.repository | string | `"sagcr.azurecr.io/webmethods-microservicesruntime"` | Pull this image. Default is MSR from [IBM webMethods Container Registry](https://containers.webmethods.io) |
