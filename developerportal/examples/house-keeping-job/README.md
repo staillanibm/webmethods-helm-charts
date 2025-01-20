@@ -2,14 +2,12 @@
 
 Following scheduled job backups data `Theme`, `User`, `Collaboration` and `Core` of Developer Portal.
 
-To move the Shell script into a job, we must change ...
+To move the Shell script into a job, we must change in Shell script ...
 
 * Evaluate the post and port of Developer Portal.
 * Evaluate the administrator password.
 * We need a container image with `curl` and `jq`.
 * The backup zip file should be saved on a persistent volume. A persistent volume should be mounted.
-
-## Shell Script
 
 ```
 #/bin/bash
