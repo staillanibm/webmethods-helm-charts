@@ -50,6 +50,6 @@ helm install wm-mws mywebmethodsserver
 | `1.0.2` | `containerName` added in `values.yaml`. Default is the Chart name. (Use `helm repo update` to get latest Helm Chart version.) |
 | `1.0.3` | `tpl` function support in `affinity` value added. `topologySpreadConstraints` support added. |
 | `1.0.4` | `priorityClassName` support added. Implementation of `extraConfigMaps`, `extraVolumeMounts` and `extraVolumes` added. |
-| `1.1.0` | Implements `extraEnvs` how other Charts. Supports 64base encoded as binary data for ConfigMaps |
+| `1.1.0` | Fix and implements `extraEnvs` how other Charts. Supports 64base encoded as binary data for ConfigMaps. Implements `revisionHistoryLimit`. |
 
 {{ template "chart.valuesSection" . }}
