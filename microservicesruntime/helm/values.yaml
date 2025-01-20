@@ -29,12 +29,12 @@ containerName:
 # -- Extra Labels
 extraLabels: {}
 
-# -- Exta volumes that should be mounted.
+# -- Extra volumes that should be mounted.
 # - name: extras
 #   emptyDir: {}
 extraVolumes: []
 
-# -- Exta environment properties to be passed on to the Microservices Runtime
+# -- Extra environment properties to be passed on to the Microservices Runtime
 #  - name: extraEnvironmentVariable
 #    value: "myvalue"
 extraEnvs: []
