@@ -41,6 +41,14 @@ kubectl create secret docker-registry regcred --docker-server=sagcr.azurecr.io -
 helm install webmethods/developerportal devportal
 ```
 
+## Examples for Use-cases
+
+Sub-folder `examples` contains some *values* examples for more use-cases. To use the use-case, adapt and add the provided `values.yaml` to your values.
+
+| Use-case | Description |
+|-----|------|
+| [House Keeping Backup](../examples/house-keeping-job/README.md) | Job to backup data of Developer Portal |
+
 ## Version History
 
 | Version | Changes and Description |

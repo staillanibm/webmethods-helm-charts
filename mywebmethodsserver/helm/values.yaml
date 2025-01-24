@@ -1,5 +1,8 @@
 replicaCount: 1
 
+# -- The number of old ReplicaSets to retain to allow rollback.
+revisionHistoryLimit: 10
+
 image:
   # -- The image name / location of the custom MyWebmethodsRepository
   repository: mywebmethodsserver
@@ -25,7 +28,9 @@ serviceAccount:
 # -- Extra Labels
 extraLabels: {}
 
-# -- Exta environment properties to be passed on to the MyWebMethods Server
+# -- Exta environment properties to be passed on to the My webMethods Server
+#  - name: extraEnvironmentVariable
+#    value: "myvalue"
 extraEnvs: {}
 
 # -- Exta volumes that should be mounted.
@@ -38,6 +43,9 @@ extraEnvs: {}
 #        resources:
 #          requests:
 #            storage: 10
+extraVolumes: []
+
+# -- Extra volume claim template to be passed on to the My webMethods Server
 extraVolumeClaimTemplates: []
 
 # -- Extra volume mounts

@@ -32,6 +32,10 @@ binaryData:
   {{- range $key, $val := .binaryData }}
   {{ $key }}: {{ $val | b64enc }}
   {{- end }}
+{{- else if .b64EncData }}
+binaryData:
+  {{ .name }}: >-
+    {{ .b64EncData }}
 {{- else }}
 data:
   {{- range $key, $val := .data }}

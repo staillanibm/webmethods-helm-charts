@@ -50,6 +50,7 @@ helm install wm-mws mywebmethodsserver
 | `1.0.2` | `containerName` added in `values.yaml`. Default is the Chart name. (Use `helm repo update` to get latest Helm Chart version.) |
 | `1.0.3` | `tpl` function support in `affinity` value added. `topologySpreadConstraints` support added. |
 | `1.0.4` | `priorityClassName` support added. Implementation of `extraConfigMaps`, `extraVolumeMounts` and `extraVolumes` added. |
+| `1.1.0` | Fix and implements `extraEnvs` how other Charts. Supports 64base encoded as binary data for ConfigMaps. Implements `revisionHistoryLimit`. |
 
 ## Values
 
@@ -63,11 +64,12 @@ helm install wm-mws mywebmethodsserver
 | containerName | string | `nil` | The name of the main container, by default this will be Chart name. |
 | extraConfigMaps | list | `[]` | Extra config maps for addtional configurations such as extra ports, etc. |
 | extraContainers | string | `nil` | Extra containers which should run in addtion to the main container as a sidecar - name: do-something   image: busybox   command: ['do', 'something'] |
-| extraEnvs | object | `{}` | Exta environment properties to be passed on to the MyWebMethods Server |
+| extraEnvs | object | `{}` | Exta environment properties to be passed on to the My webMethods Server  - name: extraEnvironmentVariable    value: "myvalue" |
 | extraInitContainers | list | `[]` | Extra init containers that are executed before starting the main container - name: do-something   image: busybox   command: ['do', 'something'] |
 | extraLabels | object | `{}` | Extra Labels |
-| extraVolumeClaimTemplates | list | `[]` | Exta volumes that should be mounted. Example:    - metadata:        name: shared-volume      spec:        accessModes: ["ReadWriteMany"]        storageClassName: nfs        resources:          requests:            storage: 10 |
+| extraVolumeClaimTemplates | list | `[]` | Extra volume claim template to be passed on to the My webMethods Server |
 | extraVolumeMounts | list | `[]` | Extra volume mounts - name: extras   mountPath: /usr/share/extras   readOnly: true |
+| extraVolumes | list | `[]` | Exta volumes that should be mounted. Example:    - metadata:        name: shared-volume      spec:        accessModes: ["ReadWriteMany"]        storageClassName: nfs        resources:          requests:            storage: 10 |
 | fullnameOverride | string | `""` | Overwrites full workload name. As default, the workload name is release name + '-' + Chart name. |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"mywebmethodsserver"` | The image name / location of the custom MyWebmethodsRepository |
@@ -96,6 +98,7 @@ helm install wm-mws mywebmethodsserver
 | prometheus | object | `{"interval":"10s","path":"/metrics","port":"8585","scheme":"http","scrape":"true","scrapeTimeout":"10s"}` | Define values for Prometheus Operator to scrap metrics via annotation or ServiceMonitor. |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` | Define CPU and memory resources for container |
+| revisionHistoryLimit | int | `10` | The number of old ReplicaSets to retain to allow rollback. |
 | securityContext | object | `{}` | The security context the pods should run in. capabilities:   drop:   - ALL readOnlyRootFilesystem: true runAsNonRoot: true runAsUser: 1000 |
 | service | object | `{"port":8585,"type":"ClusterIP"}` | The service type of the MyWebMethodsServer service |
 | serviceAccount.create | bool | `false` |  |

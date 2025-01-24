@@ -25,11 +25,12 @@ jobs:
           fetch-depth: 0
 
       - name: Git clone
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name  "${{ github.event.head_commit.committer.name  }}"
           git config --global user.email "${{ github.event.head_commit.committer.email }}"
-          git clone git@github.com:SoftwareAG/webmethods-helm-charts.git -b ${{ github.ref_name }}
-      
+          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} -b ${{ github.ref_name }}
 
       - name: Generate Helm README Documentation with jnorwood
         run: |
