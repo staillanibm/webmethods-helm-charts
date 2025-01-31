@@ -7,10 +7,6 @@ spec:
   selector:
     matchLabels:
       {{- include "common.labels.matchLabels" . | nindent 8 }}
-      {{- with .Values.extraLabels -}}
-      {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.apigw.extraLabels -}}
-      {{ toYaml . | nindent 8 }}
-      {{- end }}
+      {{- toYaml .Values.extraLabels | nindent 8 }}
+      {{- toYaml .Values.apigw.extraLabels | nindent 8 }}
 {{- end }}
