@@ -33,7 +33,6 @@ fullnameOverride: ""
 # -- Sets podDisruptionBudget options for api gateway
 podDisruptionBudget:
   enabled: false
-  # -- Specify wether to use maxUnavailable or minAvailable (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#poddisruptionbudgetspec-v1-policy) 
   # maxUnavailable: 1
   # minAvailable: 1
 
