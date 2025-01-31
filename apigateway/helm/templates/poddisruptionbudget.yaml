@@ -2,11 +2,8 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 spec:
-  {{- if .Values.podDisruptionBudget.maxUnavailable }}
-  maxUnavailable: {{ .Values.podDisruptionBudget.minAvailable }}
-  {{- end }}
-  {{- if .Values.podDisruptionBudget.minAvailable }}
-  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- with podDisruptionBudget.spec -}}
+  {{ toYaml . | nindent 2 }}
   {{- end }}
   selector:
     matchLabels:
