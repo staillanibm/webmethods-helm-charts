@@ -33,9 +33,9 @@ fullnameOverride: ""
 # -- Sets podDisruptionBudget options for api gateway
 podDisruptionBudget:
   enabled: false
-  spec: {}
-    # maxUnavailable: 1
-    # minAvailable: 1
+  # spec:
+  #   maxUnavailable: 1
+  #   minAvailable: 1
 
 serviceAccount:
   # -- Specifies whether a service account should be created
