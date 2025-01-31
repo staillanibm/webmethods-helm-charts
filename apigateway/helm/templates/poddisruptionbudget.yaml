@@ -1,8 +1,9 @@
 {{- if .Values.podDisruptionBudget.enabled }}
+{{- required "A valid PodDisruptionBudgetSpec is required!" .Values.podDisruptionBudget.spec -}}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 spec:
-  {{- toYaml (required "A valid PodDisruptionBudgetSpec is required!" .Values.podDisruptionBudget.spec) | nindent 2 }}
+  {{- toYaml .Values.podDisruptionBudget.spec | nindent 2 }}
   selector:
     matchLabels:
       {{- include "common.labels.matchLabels" . | nindent 8 }}
