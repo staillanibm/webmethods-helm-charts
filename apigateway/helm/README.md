@@ -171,6 +171,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `1.2.9` | `priorityClassName` support added for APIGW, Elasticsearch and Kibana. |
 | `2.0.0` | Prometheus Elasticsearch Exporter version `6.5.0` is used. Value `revisionHistoryLimit` is added and documented. |
 | `2.0.1` | Fix `revisionHistoryLimit` for Kibana. |
+| `2.1.0` | Added ability to use PodDisruptionBudget for API Gateway and updated Prometheus Elasticsearch Exporter to `6.6.0` |
 
 ## Chart Version `2.0.0`
 
@@ -401,6 +402,7 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | nameOverride | string | `""` | Overwrites Chart name of release name in workload name. As default, the workload name is release name + '-' + Chart name. The workload name is at the end release name + '-' + value of `nameOverride`. |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
+| podDisruptionBudget | object | `{"enabled":false}` | Create a PodDisruptionBudget for API Gateway |
 | podSecurityContext | object | `{}` |  |
 | priorityClassName | string | `""` | Set APIGW and Nginx Pods' Priority Class Name ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/ |
 | prometheus | object | `{"interval":"10s","path":"/metrics","port":"5555","scheme":"http","scrape":"true","scrapeTimeout":"10s"}` | Define values for Prometheus Operator to scrap metrics via annotation or ServiceMonitor. |
