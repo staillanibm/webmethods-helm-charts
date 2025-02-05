@@ -172,6 +172,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `2.0.0` | Prometheus Elasticsearch Exporter version `6.5.0` is used. Value `revisionHistoryLimit` is added and documented. |
 | `2.0.1` | Fix `revisionHistoryLimit` for Kibana. |
 | `2.1.0` | Added ability to use PodDisruptionBudget for API Gateway and updated Prometheus Elasticsearch Exporter to `6.6.0` |
+| `2.1.1` | Fixed metadata of PodDisruptionBudget for API Gateway |
 
 ## Chart Version `2.0.0`
 
