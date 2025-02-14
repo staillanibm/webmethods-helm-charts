@@ -28,30 +28,31 @@ jobs:
 
       - name: Dry-run of apigateway
         run: |
-          helm dependencies update apigateway/helm
-          helm template apigw      apigateway/helm
+          helm dependency update apigateway/helm
+          helm template apigw apigateway/helm
+          helm template apigw apigateway/helm --set podDisruptionBudget.enabled=true --set podDisruptionBudget.spec.maxUnavailable=1
 
       - name: Dry-run of developerportal
         run: |
-          helm dependencies update developerportal/helm
-          helm template devportal  developerportal/helm
+          helm dependency update developerportal/helm
+          helm template devportal developerportal/helm
 
       - name: Dry-run of microservicesruntime
         run: |
-          helm dependencies update microservicesruntime/helm
-          helm template msr        microservicesruntime/helm
+          helm dependency update microservicesruntime/helm
+          helm template msr microservicesruntime/helm
 
       - name: Dry-run of mywebmethodsserver
         run: |
-          helm dependencies update mywebmethodsserver/helm
-          helm template mws        mywebmethodsserver/helm
+          helm dependency update mywebmethodsserver/helm
+          helm template mws mywebmethodsserver/helm
 
       - name: Dry-run of universalmessaging
         run: |
-          helm dependencies update universalmessaging/helm
-          helm template um         universalmessaging/helm
+          helm dependency update universalmessaging/helm
+          helm template um universalmessaging/helm
 
       - name: Dry-run of terracottabigmemorymax
         run: |
-          helm dependencies update terracottabigmemorymax/helm
-          helm template tc         terracottabigmemorymax/helm
+          helm dependency update terracottabigmemorymax/helm
+          helm template tc terracottabigmemorymax/helm

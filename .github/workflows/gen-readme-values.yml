@@ -3,10 +3,10 @@ name: Regenerate Helm README Documentation
 on:
   push:
     branches-ignore:
-      - main 
+      - main
       - gh-pages # Run on all not 'main' and 'gh-pages' branches
     paths:
-      - '**/helm/values.yaml'         # Only if values.yaml or ... 
+      - '**/helm/values.yaml'         # Only if values.yaml or ...
       - '**/helm/README.md.gotmpl'    #     ... README.md.gotmpl is pushed
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Git clone
-        env: 
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name  "${{ github.event.head_commit.committer.name  }}"
@@ -37,7 +37,7 @@ jobs:
           cd webmethods-helm-charts/
           sudo docker run --rm --volume "$(pwd):/helm-docs" -u $(id -u) jnorwood/helm-docs:latest
 
-      - name: Push new generated README  
+      - name: Push new generated README
         env:
           CMT_MSG: ${{ github.event.head_commit.message }}
         run: |
