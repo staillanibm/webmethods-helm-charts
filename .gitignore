@@ -1,2 +1,7 @@
 /.project
 .DS_Store
+
+# helm
+charts
+Chart.lock
+*.tgz
