@@ -1,0 +1,22 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "common.names.fullname" . }}-pdb
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- with .Values.extraLabels -}}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- toYaml (required "A valid PodDisruptionBudgetSpec is required!" .Values.podDisruptionBudget.spec) | nindent 2 }}
+  selector:
+    matchLabels:
+      {{- include "common.labels.matchLabels" . | nindent 8 }}
+      {{- with .Values.extraLabels -}}
+      {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apigw.extraLabels -}}
+      {{ toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

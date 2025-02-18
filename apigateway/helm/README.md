@@ -171,6 +171,9 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `1.2.9` | `priorityClassName` support added for APIGW, Elasticsearch and Kibana. |
 | `2.0.0` | Prometheus Elasticsearch Exporter version `6.5.0` is used. Value `revisionHistoryLimit` is added and documented. |
 | `2.0.1` | Fix `revisionHistoryLimit` for Kibana. |
+| `2.1.0` | Added ability to use PodDisruptionBudget for API Gateway and updated Prometheus Elasticsearch Exporter to `6.6.0` |
+| `2.1.1` | Fixed metadata of PodDisruptionBudget for API Gateway |
+| `2.1.2` | Fixed metadata.name of PodDisruptionBudget for API Gateway |
 
 ## Chart Version `2.0.0`
 
@@ -178,7 +181,7 @@ The Chart version `2.0.0` uses the [Prometheus Elasticsearch Exporter](https://g
 
 ### Migrate from `1.x.x` to `2.0.0`
 
-If you want to migrate the Elasticsearch Exporter version `5.0.0`, you must delete the existing deployment. Over install is not working. You see the error ... 
+If you want to migrate the Elasticsearch Exporter version `5.0.0`, you must delete the existing deployment. Over install is not working. You see the error ...
 
 ```
 Error: UPGRADE FAILED: cannot patch "apigw-prometheus-elasticsearch-exporter" ...
@@ -401,6 +404,7 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | nameOverride | string | `""` | Overwrites Chart name of release name in workload name. As default, the workload name is release name + '-' + Chart name. The workload name is at the end release name + '-' + value of `nameOverride`. |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
+| podDisruptionBudget | object | `{"enabled":false}` | Create a PodDisruptionBudget for API Gateway |
 | podSecurityContext | object | `{}` |  |
 | priorityClassName | string | `""` | Set APIGW and Nginx Pods' Priority Class Name ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/ |
 | prometheus | object | `{"interval":"10s","path":"/metrics","port":"5555","scheme":"http","scrape":"true","scrapeTimeout":"10s"}` | Define values for Prometheus Operator to scrap metrics via annotation or ServiceMonitor. |

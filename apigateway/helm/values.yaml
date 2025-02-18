@@ -30,6 +30,14 @@ nameOverride: ""
 # -- Overwrites full workload name. As default, the workload name is release name + '-' + Chart name.
 fullnameOverride: ""
 
+# -- Create a PodDisruptionBudget for API Gateway
+podDisruptionBudget:
+  enabled: false
+  # -- Set a valid PodDisruptionBudgetSpec
+  # spec:
+  #   maxUnavailable: 1
+  #   minAvailable: 1
+
 serviceAccount:
   # -- Specifies whether a service account should be created
   # if you set this to false, you need to specify an existing service account in 'name'.
