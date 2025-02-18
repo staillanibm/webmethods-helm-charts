@@ -34,21 +34,21 @@ jobs:
           sh ./get_helm.sh
           rm ./get_helm.sh
 
-      - name: Generate Helm repo files
+      - name: Update dependencies and package helm charts
         run: |
-          helm package -u common/helm
-          helm package -u apigateway/helm
-          helm package -u developerportal/helm
-          helm package -u microservicesruntime/helm
-          helm package -u mywebmethodsserver/helm
-          helm package -u universalmessaging/helm
-          helm package -u terracottabigmemorymax/helm
+          helm package --dependency-update common/helm
+          helm package --dependency-update apigateway/helm
+          helm package --dependency-update developerportal/helm
+          helm package --dependency-update microservicesruntime/helm
+          helm package --dependency-update mywebmethodsserver/helm
+          helm package --dependency-update universalmessaging/helm
+          helm package --dependency-update terracottabigmemorymax/helm
 
-      - name: Push Helm Charts to this GitHub repo branch 'gh-pages' 
-        env: 
+      - name: Push Helm Charts to this GitHub repo branch 'gh-pages'
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pwd 
+          pwd
           ls -la
           git config --global user.name  "${{ github.event.head_commit.committer.name  }}"
           git config --global user.email "${{ github.event.head_commit.committer.email }}"
