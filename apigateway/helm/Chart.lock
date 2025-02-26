@@ -1,9 +1,0 @@
-dependencies:
-- name: common
-  repository: https://ibm.github.io/webmethods-helm-charts/charts
-  version: 1.0.3
-- name: prometheus-elasticsearch-exporter
-  repository: https://prometheus-community.github.io/helm-charts
-  version: 6.6.0
-digest: sha256:88d18bb1e1e7ff6f3e2ab6db44e0476eff681e5acee2ef904b9b62b9d6320777
-generated: "2025-01-31T13:23:53.909866485+01:00"
