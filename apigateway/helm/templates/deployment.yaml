@@ -196,7 +196,6 @@ spec:
             httpGet:
               path: /rest/apigateway/health
               port: {{ int .Values.apigw.adminPort }}
-              scheme: {{ .Values.apigw.readinessProbe.scheme }}
             {{- toYaml .Values.apigw.readinessProbe.fields | nindent 12 }}
           resources:
             {{- toYaml .Values.resources.apigwContainer | nindent 12 }}

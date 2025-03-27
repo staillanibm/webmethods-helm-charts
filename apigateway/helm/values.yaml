@@ -333,14 +333,14 @@ apigw:
   grpcPort:                4440
   # -- readinessProbe configuration for API Gateway container. The readiness probe is used to determine if the container is ready to accept traffic.
   readinessProbe:
-    fields:
-      failureThreshold: 3
-      initialDelaySeconds: 30
-      periodSeconds: 30
-      successThreshold: 1
-      timeoutSeconds: 1
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    successThreshold: 1
+    timeoutSeconds: 1
     # -- The readiness probe scheme (https or http).
-    scheme: "HTTP"
+    httpGet:
+      scheme: "HTTP"
   # -- livenessProbe configuration for API Gateway container. The liveness probe is used to determine if the container is still running.
   livenessProbe:
     failureThreshold: 3
