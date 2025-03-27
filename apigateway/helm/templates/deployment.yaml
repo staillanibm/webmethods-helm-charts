@@ -185,12 +185,8 @@ spec:
           {{- toYaml .Values.extraPorts | nindent 10 }}
           {{- end }}
           livenessProbe:
-            tcpSocket:
-              port: {{ int .Values.apigw.adminPort }}
             {{- toYaml .Values.apigw.livenessProbe | nindent 12 }}
           startupProbe:
-            tcpSocket:
-              port: {{ int .Values.apigw.adminPort }}
             {{- toYaml .Values.apigw.startupProbe | nindent 12 }}
           readinessProbe:
             {{- toYaml .Values.apigw.readinessProbe | nindent 12 }}

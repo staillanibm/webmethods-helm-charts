@@ -344,6 +344,8 @@ apigw:
     timeoutSeconds: 1
   # -- livenessProbe configuration for API Gateway container. The liveness probe is used to determine if the container is still running.
   livenessProbe:
+    tcpSocket:
+      port: admin-http
     failureThreshold: 3
     initialDelaySeconds: 10
     periodSeconds: 10
@@ -351,6 +353,8 @@ apigw:
     timeoutSeconds: 1
   # -- startupProbe configuration for API Gateway container. Runs before the livenessProbe. It is used to determine if the container has finished starting.
   startupProbe:
+    tcpSocket:
+      port: admin-http
     failureThreshold: 12
     periodSeconds: 30
     successThreshold: 1
