@@ -193,10 +193,7 @@ spec:
               port: {{ int .Values.apigw.adminPort }}
             {{- toYaml .Values.apigw.startupProbe | nindent 12 }}
           readinessProbe:
-            httpGet:
-              path: /rest/apigateway/health
-              port: {{ int .Values.apigw.adminPort }}
-            {{- toYaml .Values.apigw.readinessProbe.fields | nindent 12 }}
+            {{- toYaml .Values.apigw.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources.apigwContainer | nindent 12 }}
           volumeMounts:
