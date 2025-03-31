@@ -30,6 +30,8 @@ variables:
 trigger:
 - none
 
+pr: none # will disable PR builds
+
 name: '${{parameters.JOB_NAME}}'     # Pipeline run number.
 appendCommitMessageToRunName: false  # Append the commit message to the build number. The default is true.
 
