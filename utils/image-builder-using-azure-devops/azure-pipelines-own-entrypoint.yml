@@ -35,6 +35,8 @@ appendCommitMessageToRunName: false  # Append the commit message to the build nu
 trigger:
 - none
 
+pr: none # will disable PR builds
+
 pool:
   name: $(AGENT_POOL)
   vmImage: ubuntu-latest
