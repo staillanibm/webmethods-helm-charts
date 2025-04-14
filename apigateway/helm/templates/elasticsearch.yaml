@@ -27,7 +27,7 @@ metadata:
     {{- with .Values.extraLabels -}}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- with .Values.elasticsearch.annoations -}}
+  {{- with .Values.elasticsearch.annotations -}}
   annotations:
     {{ toYaml . | nindent 4 }}
   {{- end }}
