@@ -50,18 +50,15 @@ steps:
     docker login -u '$(REGISTRY_USERNAME)' -p '$(REGISTRY_PASSWORD)' $(REGISTRY_HOST)
   displayName: 'Login Docker registry'
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      if [ "x$(INSTALLER_VERSION)" -ne "x" ]; then
-        echo 'Download Installer from Empower by release date: $(INSTALLER_VERSION)'
-        curl https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller$(INSTALLER_VERSION)-Linux_x86_64.bin -o installer.bin
-      fi
-      if [ "x$(INSTALLER_URL)" -ne "x" ]; then
-        echo 'Download Installer by release URL: $(INSTALLER_URL)'
-        curl "$(INSTALLER_URL)" -o installer.bin
-      fi
+- script: |
+    if [ '$(INSTALLER_URL)' -ne '' ]; then
+      echo 'Download Installer by release URL: $(INSTALLER_URL)'
+      curl '$(INSTALLER_URL)' -o installer.bin
+    fi
+    if [ '$(INSTALLER_VERSION)' -ne '' ]; then
+      echo 'Download Installer from Empower by release date: $(INSTALLER_VERSION)'
+      curl 'https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller$(INSTALLER_VERSION)-Linux_x86_64.bin' -o installer.bin
+    fi
   displayName: 'Download Installer'
 
 - script: |
