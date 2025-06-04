@@ -51,11 +51,11 @@ steps:
   displayName: 'Login Docker registry'
 
 - script: |
-    if [ '$(INSTALLER_URL)' -ne '' ]; then
+    if [ ! '$(INSTALLER_URL)' == '' ]; then
       echo 'Download Installer by release URL: $(INSTALLER_URL)'
       curl '$(INSTALLER_URL)' -o installer.bin
     fi
-    if [ '$(INSTALLER_VERSION)' -ne '' ]; then
+    if [ ! '$(INSTALLER_VERSION)' == '' ]; then
       echo 'Download Installer from Empower by release date: $(INSTALLER_VERSION)'
       curl 'https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller$(INSTALLER_VERSION)-Linux_x86_64.bin' -o installer.bin
     fi
