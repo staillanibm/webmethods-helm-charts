@@ -50,7 +50,7 @@ steps:
     docker login -u '$(REGISTRY_USERNAME)' -p '$(REGISTRY_PASSWORD)' $(REGISTRY_HOST)
   displayName: 'Login Docker registry'
 
-- script: |
+- bash: |
     if [ "x$(INSTALLER_VERSION)" -ne "x" ]; then
       echo 'Download Installer from Empower by release date: $(INSTALLER_VERSION)'
       curl https://empowersdc.softwareag.com/ccinstallers/SoftwareAGInstaller$(INSTALLER_VERSION)-Linux_x86_64.bin -o installer.bin
