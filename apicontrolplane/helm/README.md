@@ -56,7 +56,7 @@ The machine needs following to install the control plane through helm.
     - create a kubernetes secret named certs-secret
 
         ```bash
-        kubectl create secret generic certs-secret --from-file=../certs -n control-plane
+        kubectl create secret generic certs-secret --from-file=../examples/certs -n control-plane
         ```
 
     - create a kuberetes docker-registry secret
