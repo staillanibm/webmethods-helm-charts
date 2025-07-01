@@ -1,4 +1,10 @@
-# API Control Plane deployment with helm
+# Deploying API Control Plane
+
+We have two ways of deploying a self-hosted version of API Control Plane - using Docker Compose and using Helm.
+
+For deployment instructions using Docker Compose, go [here](../examples/docker/README.md).
+
+## API Control Plane Deployment with Helm
 
 The instructions for installing and running the API Control Plane on kubernetes using helm are below.
 
@@ -32,7 +38,6 @@ The machine needs following to install the control plane through helm.
 ## How to deploy IBM webMethods API Control Plane using helm?
 > **Note:** This release includes container images built only for the `amd64` architecture. `arm64` platforms are currently not supported
 
-
 1. Refer https://www.ibm.com/docs/en/wm-api-control-plane/11.1.0?topic=plane-deploy-api-control to pull control plane images from IBM container registry.
 
 2. Configure your deployment
@@ -52,7 +57,7 @@ The machine needs following to install the control plane through helm.
         ```bash
         kubectl create namespace control-plane
         ```
-    
+   
     - create a kubernetes secret named certs-secret
 
         ```bash
@@ -83,7 +88,7 @@ The machine needs following to install the control plane through helm.
     REVISION: 1
     TEST SUITE: None
     ```
-  
+ 
 4. Verify it's started
 
     It will take a couple of minutes to start. You can monitor that with solutions like Portainer or Docker\Kubernetes Dashboard etc. or simply user Docker\Kubernetes CLI like this
@@ -124,7 +129,7 @@ The machine needs following to install the control plane through helm.
     replicaset.apps/ingress-7d4567dcf8       2         2         2       5m43s
     replicaset.apps/ui-6c8d58d754            2         2         2       5m43s
     replicaset.apps/ui-6c8d58d754            1         1         1       5m43s
-   
+  
     NAME                             READY   AGE
     statefulset.apps/datastore-cp-0   1/1     5m43s
     ```
@@ -181,7 +186,7 @@ To enable it set the property `applications.jaegertracing.enabled` to `true` in 
     port : 4317
     #--- UI Port in which Jaeger is exposed
     uiPort: 16686
-     #--- Node Port to access JaegarUI outside the cluster 
+     #--- Node Port to access JaegarUI outside the cluster
     extPort: 30007
     storage: 2Gi
     resources:
@@ -189,11 +194,11 @@ To enable it set the property `applications.jaegertracing.enabled` to `true` in 
       # https://raw.githubusercontent.com/hansehe/jaeger-all-in-one/master/helm/jaeger-all-in-one/values.yaml
       limits:
         cpu: 100m
-        memory: 128Mi                                                     
+        memory: 128Mi                                                    
       requests:
         cpu: 100m
         memory: 128Mi
-    # - Enable to use volume mapping for Jaeger    
+    # - Enable to use volume mapping for Jaeger   
     volume:
       enabled: false
       className: ""
@@ -205,6 +210,81 @@ To enable it set the property `applications.jaegertracing.enabled` to `true` in 
 
 :wave: The Jaeger deployment here is a stateless deployment. Please refer to https://github.com/hansehe/jaeger-all-in-one/tree/master/helm for the complete production level deployment of Jaeger.
 
-
 ###### [Back to Top](#api-control-plane-deployment-with-helm)
 ***
+
+## Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| applications.assetcatalog.imageName | string | `"cp.icr.io/cp/webmethods/api/ibm-webmethods-api-control-plane-assetcatalog"` | Image name of assetcatalog |
+| applications.assetcatalog.imageTag | string | `"11.1.5"` | Image tag of assetcatalog |
+| applications.assetcatalog.logLevel | string | `"TRACE"` |  |
+| applications.assetcatalog.name | string | `"assetcatalog"` | Name of the application  |
+| applications.assetcatalog.replicas | int | `2` | No. of assetcatalog Replicas |
+| applications.assetcatalog.resources.limits.cpu | string | `"500m"` | Maximum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.assetcatalog.resources.limits.memory | string | `"512Mi"` | Maximum Memory resource units |
+| applications.assetcatalog.resources.requests.cpu | string | `"500m"` | Minimum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.assetcatalog.resources.requests.memory | string | `"512Mi"` | Minimum Memory resource units |
+| applications.datastore.cluster | object | `{"initial_cluster_manager_nodes":"datastore-0"}` | Cluster master nodes in the format "<name>-0, ..., <name>-(n-1)" where n is replicas. For a single node cluster it will be "<name>-0". |
+| applications.datastore.imageName | string | `"opensearchproject/opensearch"` | Opensearch image name |
+| applications.datastore.imageTag | string | `"2.19.1"` | Opensearch image tag |
+| applications.datastore.name | string | `"datastore"` |  |
+| applications.datastore.replicas | int | `1` | Storage size for persistent volume |
+| applications.datastore.resources.limits.cpu | int | `1` | Maximum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.datastore.resources.limits.memory | string | `"2Gi"` | Maximum Memory resource units |
+| applications.datastore.resources.requests.cpu | int | `1` | Minimum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.datastore.resources.requests.memory | string | `"2Gi"` | Minimum Memory resource units |
+| applications.datastore.storage | string | `"5Gi"` |  |
+| applications.datastore.storageClassName | string | `"default"` |  |
+| applications.engine.imageName | string | `"cp.icr.io/cp/webmethods/api/ibm-webmethods-api-control-plane-engine"` | Image name of engine |
+| applications.engine.imageTag | string | `"11.1.5"` | Image tag of engine |
+| applications.engine.logLevel | string | `"TRACE"` |  |
+| applications.engine.name | string | `"engine"` |  |
+| applications.engine.replicas | int | `2` | No. of engine Replicas  |
+| applications.engine.resources.limits.cpu | string | `"500m"` | Maximum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.engine.resources.limits.memory | string | `"512Mi"` | Maximum Memory resource units |
+| applications.engine.resources.requests.cpu | string | `"500m"` | Minimum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.engine.resources.requests.memory | string | `"512Mi"` | Minimum Memory resource units |
+| applications.ingress.imageName | string | `"cp.icr.io/cp/webmethods/api/ibm-webmethods-api-control-plane-ingress"` | Image name of ingress |
+| applications.ingress.imageTag | string | `"11.1.5"` | Image tag of ingress |
+| applications.ingress.licenseFileName | string | `"my_cp_license.xml"` |  |
+| applications.ingress.logLevel | string | `"TRACE"` |  |
+| applications.ingress.name | string | `"ingress"` |  |
+| applications.ingress.replicas | int | `2` | No. of ingress Replicas  |
+| applications.ingress.resources.limits.cpu | string | `"500m"` | Maximum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.ingress.resources.limits.memory | string | `"1024Mi"` | Maximum Memory resource units |
+| applications.ingress.resources.requests.cpu | string | `"500m"` | Minimum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.ingress.resources.requests.memory | string | `"1024Mi"` | Minimum Memory resource units |
+| applications.ingress.sslEnabled | bool | `true` |  |
+| applications.ingress.tenantId | string | `"default"` | Tenant ID - The name of the tenant for the deployment |
+| applications.jaegertracing.enabled | bool | `false` |  |
+| applications.jaegertracing.extPort | int | `30007` |  |
+| applications.jaegertracing.imageName | string | `"jaegertracing/all-in-one"` |  |
+| applications.jaegertracing.imageTag | string | `"latest"` |  |
+| applications.jaegertracing.name | string | `"jaeger-tracing"` |  |
+| applications.jaegertracing.port | int | `4317` |  |
+| applications.jaegertracing.replicas | int | `1` |  |
+| applications.jaegertracing.resources.limits.cpu | string | `"100m"` | Maximum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.jaegertracing.resources.limits.memory | string | `"128Mi"` | Maximum Memory resource units |
+| applications.jaegertracing.resources.requests.cpu | string | `"100m"` | Minimum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.jaegertracing.resources.requests.memory | string | `"128Mi"` | Minimum Memory resource units |
+| applications.jaegertracing.storage | string | `"2Gi"` |  |
+| applications.jaegertracing.uiPort | int | `16686` |  |
+| applications.jaegertracing.volume.className | string | `""` |  |
+| applications.jaegertracing.volume.enabled | bool | `false` |  |
+| applications.jaegertracing.volume.size | string | `"3Gi"` |  |
+| applications.ui.imageName | string | `"cp.icr.io/cp/webmethods/api/ibm-webmethods-api-control-plane-ui"` | Image name of ui |
+| applications.ui.imageTag | string | `"11.1.5"` | Image tag of ui |
+| applications.ui.logLevel | string | `"TRACE"` |  |
+| applications.ui.name | string | `"ui"` |  |
+| applications.ui.replicas | int | `2` | No. of ui Replicas  |
+| applications.ui.resources.limits.cpu | string | `"500m"` | Maximum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.ui.resources.limits.memory | string | `"512Mi"` | Maximum Memory resource units |
+| applications.ui.resources.requests.cpu | string | `"500m"` | Minimum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
+| applications.ui.resources.requests.memory | string | `"512Mi"` | Minimum Memory resource units |
+| applications.ui.springCodecMaxMemorySize | int | `5242880` |  |
+| domainName | string | `"localhost"` |  |
+| imagePullSecretName | string | `"regcred"` |  |
+| secrets.certs.mountPath | string | `"/certs"` |  |
+| secrets.certs.name | string | `"certs-secret"` |  |
