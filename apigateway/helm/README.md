@@ -176,6 +176,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `2.1.2` | Fixed metadata.name of PodDisruptionBudget for API Gateway |
 | `2.1.3` | Fixed proxy connect timeout annotation on all ingresses for API Gateway |
 | `3.0.0` | Added functionality to define startup, liveness and readiness probes for API Gateway in the values file. |
+| `3.1.0` | Added ability to disable creation of the default elastic user. |
 
 ## Chart Version `3.0.0`
 
@@ -255,6 +256,7 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | elasticsearch.defaultNodeSet.memoryMapping | bool | `false` | Set this to true for production workloads, this will also use an init container to increase the vm.max_map_count to 262144 on the nodes. |
 | elasticsearch.defaultNodeSet.setMaxMapCount | bool | `true` | Controls whether to start an init container that increases the vm.max_map_count to 262144 on the node. Set memoryMapping to true and this setting also to true to run the init container. Note that this requires the ability to run privileged containers, which is likely not the case on many secure clusters. |
 | elasticsearch.deploy | bool | `true` | Deploy elastic search instance |
+| elasticsearch.disableElasticUser | bool | `false` | Decide wether to disable the default elastic user or not |
 | elasticsearch.extraSecrets | list | `[]` | Extra Secrets adding or changing built-in users of Elasticsearch. You can use this to limit the roles of the default elastic user. Note if you specify user and roles, the secret will be generated with a random password. If you just specify a name, the secret will be used as is. Example for setting the default user elastic to role view only:  - name: "elasticusersecret"    username: "elastic"    roles: "viewer" |
 | elasticsearch.image | string | `nil` | The image that should be used. By default ECK will use the official Elasticsearch images. Overwrite this to use an image from an internal registry or any custom images. Make sure that the image corresponds to the version field. |
 | elasticsearch.keystoreSecretName | string | `""` | The secret name that holds the keystore password |
