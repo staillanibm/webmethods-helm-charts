@@ -30,7 +30,7 @@ spec:
           secretName: {{ .Values.secrets.certs.name }}
       containers:
       - name: {{ .Values.applications.engine.name }}
-        image: {{ .Values.applications.engine.imageName }}:{{ .Values.applications.engine.imageTag }}
+        image: {{ .Values.applications.engine.imageName }}:{{ .Values.applications.engine.imageTag  | default .Chart.AppVersion }}
         volumeMounts:
         - name: certs
           mountPath: {{ .Values.secrets.certs.mountPath }}

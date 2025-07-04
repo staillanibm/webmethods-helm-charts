@@ -6,7 +6,7 @@ For deployment instructions using Docker Compose, go [here](../examples/docker/R
 
 ## API Control Plane Deployment with Helm
 
-The instructions for installing and running the API Control Plane on kubernetes using helm are below.
+The instructions for installing and running the API Control Plane on Kubernetes using Helm are below.
 
 The standard deployment of API Control plane contains the following 5 microservices.
 ![img.png](../docs/diagrams/apicp_logical_architecture.png)
@@ -22,20 +22,20 @@ The standard deployment of API Control plane contains the following 5 microservi
 Table of contents
 
 1. [Prerequisite](#Prerequisite)
-2. [How to deploy IBM webMethods API Control Plane using helm?](#how-to-deploy-webmethods-api-control-plane-using-helm)
-3. [How to stop IBM webMethods API Control Plane using helm?](#how-to-stop-webmethods-api-control-plane-using-helm)
+2. [How to deploy IBM webMethods API Control Plane using Helm?](#how-to-deploy-webmethods-api-control-plane-using-helm)
+3. [How to stop IBM webMethods API Control Plane using Helm?](#how-to-stop-webmethods-api-control-plane-using-helm)
 4. [How to access the newly deployed IBM webMethods API Control Plane?](#how-to-access-the-newly-deployed-webmethods-api-control-plane)
 5. [Additional deployment flavors](#additional-deployment-flavors)
 
 ***
 ## Prerequisite
-The machine needs following to install the control plane through helm.
-1. kubernetes
-2. helm
+The machine needs following to install the control plane through Helm.
+1. Kubernetes
+2. Helm
 
 ***
 
-## How to deploy IBM webMethods API Control Plane using helm?
+## How to deploy IBM webMethods API Control Plane using Helm?
 > **Note:** This release includes container images built only for the `amd64` architecture. `arm64` platforms are currently not supported
 
 
@@ -59,16 +59,22 @@ The machine needs following to install the control plane through helm.
         kubectl create namespace control-plane
         ```
     
-    - create a kubernetes secret named certs-secret
+    - create a Kubernetes secret named certs-secret
 
         ```bash
         kubectl create secret generic certs-secret --from-file=../examples/certs -n control-plane
         ```
 
-    - create a kuberetes docker-registry secret
+    - create a Kubernetes docker-registry secret
 
         ```bash
         kubectl create secret docker-registry regcred --docker-username=<ICR_USERNAME> --docker-password=<ICR_PASSWORD>  --docker-server=<ICR_REGISTRY> -n control-plane
+        ```
+
+    - build helm dependencies
+
+        ```bash
+        helm dependency build
         ```
 
     - execute the deployment script
