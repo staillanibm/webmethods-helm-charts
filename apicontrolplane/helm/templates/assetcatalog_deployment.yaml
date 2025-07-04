@@ -29,7 +29,7 @@ spec:
         secret:
           secretName: {{ .Values.secrets.certs.name }}
       containers:
-      - image: {{ .Values.applications.assetcatalog.imageName }}:{{ .Values.applications.assetcatalog.imageTag }}
+      - image: {{ .Values.applications.assetcatalog.imageName }}:{{ .Values.applications.assetcatalog.imageTag | default .Chart.AppVersion }}
         name: {{ .Values.applications.assetcatalog.name }}
         volumeMounts:
         - name: certs

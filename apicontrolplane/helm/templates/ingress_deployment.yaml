@@ -32,7 +32,7 @@ spec:
         secret:
           secretName: {{ .Values.secrets.certs.name }}
       containers:
-      - image: {{ .Values.applications.ingress.imageName }}:{{ .Values.applications.ingress.imageTag }}
+      - image: {{ .Values.applications.ingress.imageName }}:{{ .Values.applications.ingress.imageTag  | default .Chart.AppVersion }}
         name: {{ .Values.applications.ingress.name }}
         volumeMounts:
         - name: license-file
