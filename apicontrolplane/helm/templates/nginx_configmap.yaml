@@ -1,0 +1,47 @@
+# /*
+#  * Copyright (c) 2025 IBM Corporation
+#  *
+#  * SPDX-License-Identifier: Apache-2.0
+#  *
+#  *   Licensed under the Apache License, Version 2.0 (the "License");
+#  *   you may not use this file except in compliance with the License.
+#  *   You may obtain a copy of the License at
+#  *
+#  *       http://www.apache.org/licenses/LICENSE-2.0
+#  *
+#  *   Unless required by applicable law or agreed to in writing, software
+#  *   distributed under the License is distributed on an "AS IS" BASIS,
+#  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  *   See the License for the specific language governing permissions and
+#  *   limitations under the License.
+#  *
+#  */
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  default.conf: |
+    server {
+         server_name localhost;
+          listen 443 ssl ;
+           ssl_session_timeout 5m;
+           ssl_session_cache shared:SSL:50m;
+           ssl_session_tickets off;
+           ssl_certificate /etc/nginx/certs/nginx-cert.crt;
+           ssl_certificate_key /etc/nginx/certs/nginx-key.key;
+
+           location / {
+               proxy_pass https://{{ .Values.applications.ingress.name }}-svc:8443;
+               proxy_set_header X-Forwarded-Proto https;
+               proxy_set_header Host {{ .Values.domainName }};
+               proxy_set_header X-Forwarded-Port 443;
+
+            #  Configure Nginx as a client using self-signed certs
+               proxy_ssl_certificate /etc/nginx/certs/nginx-cert.crt;
+               proxy_ssl_certificate_key /etc/nginx/certs/nginx-key.key;
+
+               #proxy_ssl_trusted_certificate /etc/nginx/certs/in-cert.pem;
+               proxy_ssl_verify off;
+           }
+     }
