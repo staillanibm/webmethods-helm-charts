@@ -56,6 +56,6 @@ spec:
         secret:
           secretName: {{ .Values.secrets.certs.name }}
       imagePullSecrets:
-        - name: regcred
+        - name: {{ .Values.imagePullSecretName }}
 {{- end }}
         

@@ -148,9 +148,6 @@ secrets:
 
 domainName: localhost
 imagePullSecretName: regcred
-# -- Optionally configure a ingress class to use for the kubernetes ingress (default: nginx)
-# ingressClassName: nginx
-
 
 # -- if es_external = true, that means you want to use an external elastic search... 
 # and the built-in ES will not be deployed and ignored
