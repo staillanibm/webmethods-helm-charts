@@ -150,3 +150,40 @@ domainName: localhost
 imagePullSecretName: regcred
 # -- Optionally configure a ingress class to use for the kubernetes ingress (default: nginx)
 # ingressClassName: nginx
+
+
+# -- if es_external = true, that means you want to use an external elastic search... 
+# and the built-in ES will not be deployed and ignored
+es_external:
+  enabled: false
+  connection:
+    host: "external-elastic-host"
+    port: "9200"
+    auth:
+      userName: elastic
+      passwordSecret:
+        name: ""
+        key: ""
+      certsSecret:
+        name: ""
+        key: ""
+
+serviceAccount:
+  # The name of the service account to use.
+  name: "apicp-sa"
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  
+ingress:
+  enabled: false
+  name: apicp-ingress
+  domainName: my-control-plane
+  # className: "ingress-controller-class"
+  annotations: {}
+    # kubernetes.io/tls-acme: "true"
+  # tls:
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local

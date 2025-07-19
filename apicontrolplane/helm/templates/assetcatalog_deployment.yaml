@@ -38,6 +38,7 @@ spec:
         app: {{ .Values.applications.assetcatalog.name }}
         date: "{{ now | unixEpoch }}"
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       automountServiceAccountToken: false
       volumes:
       - name: certs
