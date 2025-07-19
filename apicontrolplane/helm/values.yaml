@@ -84,7 +84,7 @@ applications:
         # -- Minimum Memory resource units
         memory: 512Mi
     logLevel: TRACE
-    springCodecMaxMemorySize: 5242880
+    springCodecMaxMemorySize: 5MB
   datastore:
     name: datastore
     # -- Opensearch image name
