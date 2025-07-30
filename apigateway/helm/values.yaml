@@ -22,7 +22,7 @@ image:
   # -- The image tag of the apigateway image default this will be the latest version.
   # For realworld scenarios SAG recommends to use a
   # specific version to not accidently change production versions with newer images.
-  tag: "10.15"
+  tag: "11.1"
 
 # -- Image pull secret reference. By default looks for `regcred`.
 imagePullSecrets:
@@ -459,7 +459,6 @@ apigw:
 
     kibana:
       dashboardInstance: "{{ printf \"http://%s-%s-kb-http:%d\" .Release.Name .Chart.Name (int .Values.kibana.port) }}"
-      autostart: false
 
     cluster:
       aware: "{{- $isClusterEnabled := or (gt (int .Values.replicaCount) 1) .Values.apigw.clusterAware -}} {{- if $isClusterEnabled -}} true {{- else -}} false {{- end }}"
@@ -565,7 +564,7 @@ elasticsearch:
   deploy: true
 
   # -- The ECK version to be used
-  version: 8.2.3
+  version: 8.17.3
 
   # -- The image that should be used.
   # By default ECK will use the official Elasticsearch images.
@@ -697,7 +696,7 @@ elasticsearch:
 
 kibana:
   # -- The ECK version to be used
-  version: 8.2.3
+  version: 8.17.3
 
   # -- Set Pod (anti-) affinity for Kibana. You can use templates inside because `tpl` function is called for rendering.
   affinity: {}
