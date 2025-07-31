@@ -18,6 +18,16 @@
 #  */
 {{ $apigwname := (include "common.names.fullname" $ ) }}
 {{- $context := . }}
+
+{{- $tag := .Values.image.tag -}}
+{{- $major := (splitList "." $tag | first) -}}
+{{- $rootDir := dict "path" "" -}}
+{{- if ge (int $major) 11 }}
+  {{- $_ := set $rootDir "path" "/opt/softwareag/IntegrationServer" -}}
+{{- else }}
+  {{- $_ := set $rootDir "path" "/opt/softwareag/IntegrationServer/instances/default" -}}
+{{- end }}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -198,7 +208,13 @@ spec:
             {{- toYaml .Values.resources.apigwContainer | nindent 12 }}
           volumeMounts:
             - name: apigw-config
-              mountPath: /opt/softwareag/IntegrationServer/packages/WmAPIGateway/resources/configuration
+              mountPath: {{ $rootDir.path }}/packages/WmAPIGateway/resources/configuration
+            {{ if .Values.license }}
+            - name: apigw-license
+              mountPath: {{ $rootDir.path }}/config/licenseKey.xml
+              subPath:   licenseKey.xml
+              readOnly:  false
+            {{- end }}
             - name: apigw-config
               mountPath: /config/application.properties
               subPath:    application.properties
@@ -249,6 +265,15 @@ spec:
             path: apigw-config.yml
           - key:  application.properties
             path: application.properties
+      {{ if .Values.license }}
+      - name: apigw-license
+        configMap:
+          name: {{ include "apigateway.licenseconfigname" . }}
+          defaultMode: 0666
+          items:
+          - key: {{ default "licensekey" .Values.licenseConfigKey }}
+            path: licenseKey.xml
+      {{- end }}
       {{- if .Values.elasticsearch.tlsEnabled }}
       - name: elastic-tls
         secret:

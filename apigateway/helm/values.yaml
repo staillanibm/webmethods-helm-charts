@@ -563,8 +563,9 @@ elasticsearch:
   # -- Deploy elastic search instance
   deploy: true
 
-  # -- The ECK version to be used
+  # -- The ECK version to be used (version 82.3 for API GW 10.15 and 8.17.3 for API GW 10.15 11.1)
   version: 8.17.3
+  #version: 8.2.3
 
   # -- The image that should be used.
   # By default ECK will use the official Elasticsearch images.
@@ -695,8 +696,9 @@ elasticsearch:
 
 
 kibana:
-  # -- The ECK version to be used
+  # -- The ECK version to be used (version 82.3 for API GW 10.15 and 8.17.3 for API GW 10.15 11.1)
   version: 8.17.3
+  #version: 8.2.3
 
   # -- Set Pod (anti-) affinity for Kibana. You can use templates inside because `tpl` function is called for rendering.
   affinity: {}

@@ -76,6 +76,8 @@ spec:
             {{- toYaml .Values.resources.devportalContainer | nindent 12 }}
           ports:
             - containerPort: {{ .Values.devportal.port }}
+              name: ui-http
+              protocol: TCP
           env:
             - name: SPRING_ELASTICSEARCH_REST_URIS            # supports version 10.15 
               value: {{ include "developerportal.elasticservice" . }}:9200
@@ -92,6 +94,12 @@ spec:
             {{- if .Values.extraEnvs }}
             {{- toYaml .Values.extraEnvs | nindent 12 }}
             {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.devportal.livenessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.devportal.startupProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.devportal.readinessProbe | nindent 12 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

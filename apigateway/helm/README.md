@@ -177,13 +177,12 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `2.1.3` | Fixed proxy connect timeout annotation on all ingresses for API Gateway |
 | `3.0.0` | Added functionality to define startup, liveness and readiness probes for API Gateway in the values file. |
 | `3.1.0` | Added ability to disable creation of the default elastic user and to set update strategy |
-| `4.0.0` | Update of API Gateway chart for v11.1 |
+| `4.0.0` | Update of chart for v11.1 |
 
 ## Chart Version `4.0.0`
 
-In webMethods 11.1 the Integration Server has been replaced with the Microservices Runtime to support the API Gateway.  
-The WmAPIGateway package now is located under /opt/softwareag/IntegrationServer/packages/WmAPIGateway, instead of /opt/softwareag/IntegrationServer/instances/default/packages.   
-Until further notice, there's no more the need to load a product license. The license secret has been removed.  
+In webMethods 11.1 the Integration Server has been replaced with the Microservices Runtime to support the API Gateway. If the major version in the image tag >= 11, then we use the /opt/softwareag/IntegrationServer root path, otherwise we use /opt/softwareag/IntegrationServer/instances/default
+The product license mount is now optional, since (until further notice) there is no more licence to provide in v11.1.
 In the apigw-config.yml config file, the Kibana autostart attribute no longer is supported. it has been removed from the values.yaml file.  
 Also in the values.yaml file, the Elastic and Kibana version have been changed to 8.17.3 (version offocially supported for the 11.1 API Gateway).  
 

@@ -19,7 +19,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "common.names.fullname" . }}
+  name: {{ include "common.names.fullname" . }}-svc
   labels:
     {{ include "common.labels.standard" . | nindent 4 }}
     {{- with .Values.extraLabels -}}
@@ -46,3 +46,27 @@ spec:
     {{- include "common.labels.matchLabels" . | nindent 4 }}
   sessionAffinity: None
   type: {{ .Values.service.type }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  labels:
+    {{ include "common.labels.standard" . | nindent 4 }}
+    {{- with .Values.extraLabels -}}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: {{ .Values.devportal.port }}
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 8084
+  selector:
+    {{- include "common.labels.matchLabels" . | nindent 4 }}
+  sessionAffinity: None
+  type: ClusterIP

@@ -8,11 +8,11 @@ statefulSet: false
 
 image:
   # -- Pull this image. Default is MSR from [IBM webMethods Container Registry](https://containers.webmethods.io)
-  repository: "sagcr.azurecr.io/webmethods-microservicesruntime"
+  repository: "ibmwebmethods.azurecr.io/webmethods-microservicesruntime"
   # -- Pull with policy
   pullPolicy: IfNotPresent
   # -- The default value pulls latest. In PROD it is recommended to use a specific fix level.
-  tag:        "10.15"
+  tag:        "11.1"
 
 # -- Image pull secret reference. By default looks for `regcred`.
 imagePullSecrets: 
