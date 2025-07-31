@@ -83,8 +83,10 @@ spec:
               value: {{ include "developerportal.elasticservice" . }}:9200
             - name: SPRING_ELASTICSEARCH_URIS                 # supports version 11.0
               value: {{ include "developerportal.elasticservice" . }}:9200
-            - name: PORTAL_SERVER_CACHE_DISTRIBUTED_CLUSTER_PEERS_0
-              value: {{ include "common.names.fullname" . }}-svc:{{ .Values.devportal.clusterPorts.start }}..{{ .Values.devportal.clusterPorts.end }}              
+            {{- range $i, $e := until (.Values.replicaCount | int) }}
+            - name: PORTAL_SERVER_CACHE_DISTRIBUTED_CLUSTER_PEERS_{{ $i }}
+              value: "{{ include "common.names.fullname" $ }}-{{ $i }}.{{ include "common.names.fullname" $ }}-svc.{{ $.Release.Namespace }}.svc.cluster.local:{{ $.Values.devportal.clusterPorts.start }}..{{ $.Values.devportal.clusterPorts.end }}"
+            {{- end }}
             - name: PORTAL_SERVER_CACHE_DISTRIBUTED_ENABLED
               value: "true"
             {{- if $.Values.devportal.cspDomains }}

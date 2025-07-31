@@ -34,14 +34,6 @@ spec:
       protocol: TCP
       targetPort: {{ $i }}
     {{- end }}
-    - name: http
-      port: 80
-      protocol: TCP
-      targetPort: {{ .Values.devportal.port }}
-    - name: https
-      port: 443
-      protocol: TCP
-      targetPort: 8084
   selector:
     {{- include "common.labels.matchLabels" . | nindent 4 }}
   sessionAffinity: None
