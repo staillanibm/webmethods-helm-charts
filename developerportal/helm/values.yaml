@@ -11,7 +11,7 @@ image:
   # -- The image tag of the apigateway image default this will be the latest version. 
   # For realworld scenarios SAG recommends to use a 
   # specific version to not accidently change production versions with newer images.
-  tag: "10.15"
+  tag: "11.1"
 
 # -- Image pull secret reference. By default looks for `regcred`.
 imagePullSecrets: 
@@ -181,7 +181,7 @@ devportal:
 
 prometheus:
   path: "/portal/rest/v1/prometheus"
-  port: "8083"
+  port: "8080"
   scheme: "http"
   scrape: "true"
 
