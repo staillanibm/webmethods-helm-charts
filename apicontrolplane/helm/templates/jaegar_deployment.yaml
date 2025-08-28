@@ -33,6 +33,7 @@ spec:
         app: {{ .Values.applications.jaegertracing.name }}
       annotations:
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       automountServiceAccountToken: false
       containers:
       - image: {{ .Values.applications.jaegertracing.imageName }}:{{ .Values.applications.jaegertracing.imageTag }}

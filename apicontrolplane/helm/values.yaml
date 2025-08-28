@@ -84,7 +84,7 @@ applications:
         # -- Minimum Memory resource units
         memory: 512Mi
     logLevel: TRACE
-    springCodecMaxMemorySize: 5242880
+    springCodecMaxMemorySize: 5MB
   datastore:
     name: datastore
     # -- Opensearch image name
@@ -148,5 +148,23 @@ secrets:
 
 domainName: localhost
 imagePullSecretName: regcred
-# -- Optionally configure a ingress class to use for the kubernetes ingress (default: nginx)
-# ingressClassName: nginx
+
+serviceAccount:
+  # The name of the service account to use.
+  name: "apicp-sa"
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  
+ingress:
+  enabled: false
+  name: apicp-ingress
+  domainName: my-control-plane
+  # className: "ingress-controller-class"
+  annotations: {}
+    # kubernetes.io/tls-acme: "true"
+  # tls:
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local

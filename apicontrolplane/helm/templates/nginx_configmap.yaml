@@ -16,6 +16,7 @@
 #  *   limitations under the License.
 #  *
 #  */
+{{- if not .Values.ingress.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -45,3 +46,4 @@ data:
                proxy_ssl_verify off;
            }
      }
+{{- end }}
