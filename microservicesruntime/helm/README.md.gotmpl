@@ -17,7 +17,7 @@ kubectl create secret docker-registry regcred --docker-server=sagcr.azurecr.io -
 A Service Monitor CRD can be created optional. Anywhere, the custom kind `ServiceMonitor` must be registered as Kubernetes object. If not, you can apply it with ...
 
 ```
-kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
 ```
 
 ### Create Image for Microservices Runtime

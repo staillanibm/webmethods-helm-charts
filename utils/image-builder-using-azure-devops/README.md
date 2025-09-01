@@ -38,12 +38,13 @@ If you want to use another base image, check the available package manager and a
 
 The running pipeline needs additional parameters which are passed as Variable Group `webmethods-image-builder-vars` to the job. Create a Variable Group in the Azure project with following variables:
 
-* `EMPOWER_USERNAME`: Your username to Empower login
-* `EMPOWER_PASSWORD`: Your password to Empower login
-* `INSTALLER_VERSION`: This installer is used to create images. Last know version is `20230614`.
-* `REGISTRY_USERNAME`: Username to login into remote Docker registry for pushing image
-* `REGISTRY_PASSWORD`: Password to login into remote Docker registry for pushing image
-* `REGISTRY_HOST`: Hostname of remote Docker registry
+* `EMPOWER_USERNAME`: Your username to Empower login or IBM w3id.
+* `EMPOWER_PASSWORD`: Your password to Empower login or IBM Entitlement key.
+* `INSTALLER_VERSION`: if set, the installer is downloaded from Empower and used to create images. Last know version is `20230614`.
+* `INSTALLER_URL`: if set, the installer is downloaded from given URL.
+* `REGISTRY_USERNAME`: Username to login into remote Docker registry for pushing image.
+* `REGISTRY_PASSWORD`: Password to login into remote Docker registry for pushing image.
+* `REGISTRY_HOST`: Hostname of remote Docker registry.
 * `REGISTRY_PROJECT`: Project or sub-folder where the image is pushed. At the end, the image is pushed to `${REGISTRY_HOST}/${REGISTRY_PROJECT}/${TAG}`.
 * `AGENT_POOL`: Default is `wm-image-builder`. The running pipeline use the Agent Pool to address the registered agent for executing the pipeline.
 * `PROXY`: The Installer is called with this proxy option to download software though HTTP proxy. Use the URL syntax `protocol://host:port` as value.
@@ -104,6 +105,12 @@ Process Engine:
 
 ```
 MSC,wmprt,PIEContainerExternalRDBMS,Monitor,TaskClientPackage
+```
+
+Designer for Local Development:
+
+```
+Eclipse,PLDISBundles,wcd,DesignerEXXEntireX,vcs,WmSAPPlugin,LDev,DesignerDDJ,MSC,EntireXAdapter,WmSAP,PIEContainerExternalRDBMS,wst,jdbcAdapter
 ```
 
 ## [Deprecated] Running Azure Pipelines Agent in Kubernetes
