@@ -198,11 +198,13 @@ spec:
             {{- toYaml .Values.resources.apigwContainer | nindent 12 }}
           volumeMounts:
             - name: apigw-config
-              mountPath: /opt/softwareag/IntegrationServer/instances/default/packages/WmAPIGateway/resources/configuration
+              mountPath: {{ .Values.apigw.isHomeDir }}/packages/WmAPIGateway/resources/configuration
+            {{- if not .Values.skipLicenseKey }}
             - name: apigw-license
-              mountPath: /opt/softwareag/IntegrationServer/instances/default/config/licenseKey.xml
+              mountPath: {{ .Values.apigw.isHomeDir }}/config/licenseKey.xml
               subPath:   licenseKey.xml
               readOnly:  false
+            {{- end }}
             - name: apigw-config
               mountPath: /config/application.properties
               subPath:    application.properties
@@ -253,6 +255,7 @@ spec:
             path: apigw-config.yml
           - key:  application.properties
             path: application.properties
+      {{- if not .Values.skipLicenseKey }}
       - name: apigw-license
         configMap:
           name: {{ include "apigateway.licenseconfigname" . }}
@@ -260,6 +263,7 @@ spec:
           items:
           - key: {{ default "licensekey" .Values.licenseConfigKey }}
             path: licenseKey.xml
+      {{- end }}
       {{- if .Values.elasticsearch.tlsEnabled }}
       - name: elastic-tls
         secret:

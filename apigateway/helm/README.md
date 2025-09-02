@@ -176,7 +176,8 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `2.1.2` | Fixed metadata.name of PodDisruptionBudget for API Gateway |
 | `2.1.3` | Fixed proxy connect timeout annotation on all ingresses for API Gateway |
 | `3.0.0` | Added functionality to define startup, liveness and readiness probes for API Gateway in the values file. |
-| `3.1.0` | Added ability to disable creation of the default elastic user and to set update strategy |
+| `3.1.0` | Added functionality to define annotations for Elasticsearch and Kibana custom resource definition in the values file. |
+| `3.2.0` | Added minor changes and example values for API Gateway 11.1 |
 
 ## Chart Version `3.0.0`
 
@@ -217,7 +218,7 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | apigw.adminSecretName | string | `""` | The secret that holds the admin password Depends on secrets.genereateAdminSecret; if true the setting will be ignored. |
 | apigw.apigwAdminService | string | `"apigw-admin-svc"` |  |
 | apigw.applicationProperties | string | `""` | Application Properties to overwrite default API Gateway settings. Please check Handle with care - Most settings should be set via the UI, Admin API, configSources values, or via environment variables. By default only the default Administrator password is set through this mechanism if nothing is set here. Other examples are extended settings which can be set through this mechanism. Examples:  Set the default Administrator password from environment variable user.Administrator.password=$env{ADMINISTRATOR_PASSWORD}  Avoid archiving audit log files ... settings.watt.server.audit.logFilesToKeep=1  Avoid archiving server log files ... settings.watt.server.serverlogFilesToKeep=1  Avoid archiving statistic files ... settings.watt.server.stats.logFilesToKeep=1  Value for 1 to 9 to set debug level of server log ... settings.watt.debug.level=  Set the maximum number of permitted service threads in the global pool ... settings.watt.server.threadPool=750  Set the default request/response content-type ... settings.watt.net.default.content-type=json  Avoid IS internal statistic data collector ... statisticsdatacollector.monitorConfig.enabled=false |
-| apigw.configSources | object | `{"cluster":{"actionOnStartupError":"standalone","aware":"{{- $isClusterEnabled := or (gt (int .Values.replicaCount) 1) .Values.apigw.clusterAware -}} {{- if $isClusterEnabled -}} true {{- else -}} false {{- end }}","ignite":{"communicationPort":"10400","discoveryPort":"10100","k8sNamespace":"{{ .Release.Namespace }}","k8sServiceName":"{{ include \"common.names.fullname\" . }}-rt"},"name":"IgniteCluster","sessTimeout":"60"},"elasticsearch":{"hosts":"{{ default (printf \"%s-%s-es-http\" .Release.Name .Chart.Name) .Values.global.elasticsearch.serviceName }}:{{ .Values.global.elasticsearch.port }}","tenantId":"default"},"kibana":{"autostart":false,"dashboardInstance":"{{ printf \"http://%s-%s-kb-http:%d\" .Release.Name .Chart.Name (int .Values.kibana.port) }}"}}` | configuration source files for API Gateway |
+| apigw.configSources | object | `{"cluster":{"actionOnStartupError":"standalone","aware":"{{- $isClusterEnabled := or (gt (int .Values.replicaCount) 1) .Values.apigw.clusterAware -}} {{- if $isClusterEnabled -}} true {{- else -}} false {{- end }}","ignite":{"communicationPort":"10400","discoveryPort":"10100","k8sNamespace":"{{ .Release.Namespace }}","k8sServiceName":"{{ include \"common.names.fullname\" . }}-rt"},"name":"IgniteCluster","sessTimeout":"60"},"elasticsearch":{"hosts":"{{ default (printf \"%s-%s-es-http\" .Release.Name .Chart.Name) .Values.global.elasticsearch.serviceName }}:{{ .Values.global.elasticsearch.port }}","tenantId":"default"},"kibana":{"dashboardInstance":"{{ printf \"http://%s-%s-kb-http:%d\" .Release.Name .Chart.Name (int .Values.kibana.port) }}"}}` | configuration source files for API Gateway |
 | apigw.diagPort | int | `9999` | The API Diagnostics port. |
 | apigw.elasticSearchDeployment | bool | `true` | Deploy Elasticsearch. Depends on Elasic Search Helm Charts. See https://github.com/elastic/helm-charts/blob/main/elasticsearch |
 | apigw.elastickeyStoreName | string | `""` | The secret that holds the keystore password. If empty the chart will generate the name: fullname + "-es-keystore-secret". |
@@ -230,6 +231,7 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | apigw.initContainer | object | `{"enabled":true,"securityContext":{}}` | SecurityContext for apigw initContainer Deactivated by default. Usage example: securityContext:   runAsGroup: 1000   runAsUser: 1000   runAsNonRoot: true   allowPrivilegeEscalation: false   capabilities:     drop:       - ALL |
 | apigw.initContainer.enabled | bool | `true` | If apigw initContainer for ES should be enabled |
 | apigw.initMemory | string | `"1024Mi"` |  |
+| apigw.isHomeDir | string | `"/opt/softwareag/IntegrationServer/instances/default"` | IS HOME directory, for 11.x images based on Microservices Runtime use /opt/softwareag/IntegrationServer |
 | apigw.livenessProbe | object | `{"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":"admin-http"},"timeoutSeconds":1}` | livenessProbe configuration for API Gateway container. The liveness probe is used to determine if the container is still running. |
 | apigw.maxMemory | string | `"1024Mi"` |  |
 | apigw.readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/rest/apigateway/health","port":"admin-http","scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":30,"successThreshold":1,"timeoutSeconds":1}` | readinessProbe configuration for API Gateway container. The readiness probe is used to determine if the container is ready to accept traffic. |
@@ -247,9 +249,10 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | autoscaling.minReplicas | int | `1` |  |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | elasticsearch.affinity | object | `{}` | Set Pod (anti-) affinity for ElasticSearch. You can use templates inside because `tpl` function is called for rendering. |
+| elasticsearch.annotations | object | `{}` | Annotations for Elasticsearch crd |
 | elasticsearch.certificateSecretName | string | `"{{ include \"common.names.fullname\" .}}-es-tls-secret"` | The name of the secret holding the tls secret By default the name will be fullname of release + "es-tls-secret" |
 | elasticsearch.defaultNodeSet | object | `{"annotations":{},"count":1,"extraConfig":{},"extraInitContainers":{},"installMapperSizePlugin":true,"memoryMapping":false,"setMaxMapCount":true}` | Default Node Set |
-| elasticsearch.defaultNodeSet.annotations | object | `{}` | Annotations for Elasticsearch |
+| elasticsearch.defaultNodeSet.annotations | object | `{}` | Annotations for Elasticsearch pod annotations |
 | elasticsearch.defaultNodeSet.count | int | `1` | the number of replicas for Elastic Search |
 | elasticsearch.defaultNodeSet.extraConfig | object | `{}` | Extra configuration parameters for Elasticsearch nodes to be appended to the default (none). See https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-node-configuration.html |
 | elasticsearch.defaultNodeSet.extraInitContainers | object | `{}` | Extra init containers to be started before Elasticsearch nodes are started. See https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-init-containers-plugin-downloads.html |
@@ -364,6 +367,7 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | kibana.affinity | object | `{}` | Set Pod (anti-) affinity for Kibana. You can use templates inside because `tpl` function is called for rendering. |
 | kibana.allowAnonymousStatus | bool | `true` | Enable anonymous access to /api/status. |
 | kibana.annotations | object | `{}` | Annotations for Kibana |
+| kibana.annotations | object | `{}` | Annotations for Kibana crd |
 | kibana.count | int | `1` |  |
 | kibana.customLogging | object | `{"appenders":{},"enabled":false,"loggers":[],"root":{}}` | Custom logging configuration for kibana container. |
 | kibana.customLogging.appenders | object | `{}` | Define appenders for custom logging config. Example for logging to file: file:   type: file   fileName: /usr/share/kibana/logs/kibana.log   layout:     type: pattern |
@@ -455,6 +459,8 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | serviceAccount.roleName | string | `""` |  |
 | serviceMonitor.enabled | bool | `false` | Create and enable CRD ServiceMonitor. The default is `false`. |
 | serviceMonitor.serviceName | string | `""` | Set the monitored service which is connected by ServiceMonitor. Default (if not set) is the `rt` runtime service. |
+| skipKibanaAutostartParameter | bool | `false` | Skip Kibana Autostart Parameter for minimal 11.x container images |
+| skipLicenseKey | bool | `false` | Skip License Key (for 11.x container images) |
 | strategy | object | `{}` | The update strategy to use |
 | tolerations | list | `[]` |  |
 | topologySpreadConstraints | object | `{}` | Set Pod topology spread constraints for APIGW. You can use templates inside because `tpl` function is called for rendering. |

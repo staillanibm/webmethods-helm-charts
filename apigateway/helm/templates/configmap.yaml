@@ -38,14 +38,21 @@ data:
     {{- end }}
   apigw-config.yml: |
     apigw:
+      {{- $skip := default false .Values.skipKibanaAutostartParameter }}
       {{- range $key, $value := .Values.apigw.configSources }}
-        {{- if kindIs "map" $value }}
+        {{- if and (eq $key "kibana") (kindIs "map" $value) }}
+          {{- printf "%s:" $key | nindent 6 }}
+          {{- include "common.utils.renderNestedMap" (dict "map" $value "ctx" $ "depth" 8) }}
+          {{- if not $skip }}
+            {{- printf "autostart: false" | nindent 8 }}
+          {{- end }}
+        {{- else if kindIs "map" $value }}
           {{- printf "%s:" $key | nindent 6 }}
           {{- include "common.utils.renderNestedMap" (dict "map" $value "ctx" $ "depth" 8) }}
         {{- else if kindIs "string" $value }}
-          {{- printf "%s: %s" $key (tpl $value $) }}
+          {{- printf "%s: %s" $key (tpl $value $) | nindent 6 }}
         {{- else if or (kindIs "bool" $value) (or (kindIs "float" $value) (kindIs "int" $value)) }}
-          {{- printf "%s: %v" $key $value }}
+          {{- printf "%s: %v" $key $value | nindent 6 }}
         {{- end }}
       {{- end }}
   {{ if .Values.apigw.applicationProperties -}}

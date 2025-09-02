@@ -289,8 +289,15 @@ To enable it set the property `applications.jaegertracing.enabled` to `true` in 
 | applications.ui.resources.limits.memory | string | `"512Mi"` | Maximum Memory resource units |
 | applications.ui.resources.requests.cpu | string | `"500m"` | Minimum CPU resource units(1 CPU unit is equivalent to 1 physical CPU core, or 1 virtual core) |
 | applications.ui.resources.requests.memory | string | `"512Mi"` | Minimum Memory resource units |
-| applications.ui.springCodecMaxMemorySize | int | `5242880` |  |
+| applications.ui.springCodecMaxMemorySize | string | `"5MB"` |  |
 | domainName | string | `"localhost"` |  |
 | imagePullSecretName | string | `"regcred"` |  |
+| ingress.annotations | object | `{}` |  |
+| ingress.domainName | string | `"my-control-plane"` |  |
+| ingress.enabled | bool | `false` |  |
+| ingress.name | string | `"apicp-ingress"` |  |
 | secrets.certs.mountPath | string | `"/certs"` |  |
 | secrets.certs.name | string | `"certs-secret"` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.name | string | `"apicp-sa"` |  |
