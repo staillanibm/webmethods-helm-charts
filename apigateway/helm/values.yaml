@@ -11,6 +11,12 @@ strategy: {}
 # -- The number of old ReplicaSets to retain to allow rollback.
 revisionHistoryLimit: 10
 
+# -- Skip License Key (for 11.x container images)
+skipLicenseKey: false
+
+# -- Skip Kibana Autostart Parameter for minimal 11.x container images
+skipKibanaAutostartParameter: false
+
 image:
   # -- The repository for the image. By default,
   # this points to the IBM webMethods container repository.
@@ -320,6 +326,10 @@ extraConfigMaps: []
 lifecycle: {}
 
 apigw:
+
+  # -- IS HOME directory, for 11.x images based on Microservices Runtime use /opt/softwareag/IntegrationServer
+  isHomeDir: /opt/softwareag/IntegrationServer/instances/default
+
   # -- Deploy Elasticsearch. Depends on Elasic Search Helm Charts. See https://github.com/elastic/helm-charts/blob/main/elasticsearch
   elasticSearchDeployment: true
 
@@ -459,7 +469,6 @@ apigw:
 
     kibana:
       dashboardInstance: "{{ printf \"http://%s-%s-kb-http:%d\" .Release.Name .Chart.Name (int .Values.kibana.port) }}"
-      autostart: false
 
     cluster:
       aware: "{{- $isClusterEnabled := or (gt (int .Values.replicaCount) 1) .Values.apigw.clusterAware -}} {{- if $isClusterEnabled -}} true {{- else -}} false {{- end }}"
