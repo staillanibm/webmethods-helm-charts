@@ -21,12 +21,12 @@ jobs:
         apt-get update;
         apt-get install jq   -y;
         apt-get install curl -y;
-        status=$(curl -s -o /dev/null -w "%{http_code}" ${DEPLOYMENT}:5555 -u "Administrator:${ADMIN_PASSWORD}");
+        status=$(curl -s -o /dev/null -w "%{http_code}" ${DEPLOYMENT}:5555/health/liveness -u "Administrator:${ADMIN_PASSWORD}");
         while [[ "${status}" != "200" ]];
         do 
           echo Waiting for IS [${DEPLOYMENT}] status [${status}] ...;
           sleep 10;
-          status=$(curl -s -o /dev/null -w "%{http_code}" ${DEPLOYMENT}:5555 -u "Administrator:${ADMIN_PASSWORD}");
+          status=$(curl -s -o /dev/null -w "%{http_code}" ${DEPLOYMENT}:5555/health/liveness -u "Administrator:${ADMIN_PASSWORD}");
         done;
         pusdDTs=$(curl -s -u "Administrator:${ADMIN_PASSWORD}" -H "Content-Type: application/json" "${DEPLOYMENT}:5555/invoke/pub.utils.messaging:syncDocTypesToUM" | jq -r '.updatedDocumentTypes[].name');
         echo "List of Document Types retrieved ...";
