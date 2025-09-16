@@ -38,6 +38,7 @@ spec:
         app: {{ .Values.applications.assetcatalog.name }}
         date: "{{ now | unixEpoch }}"
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       automountServiceAccountToken: false
       volumes:
       - name: certs
@@ -91,5 +92,5 @@ spec:
           timeoutSeconds: 15
       terminationGracePeriodSeconds: 30
       imagePullSecrets:
-          - name: regcred
+        - name: {{ .Values.imagePullSecretName }}
 ---

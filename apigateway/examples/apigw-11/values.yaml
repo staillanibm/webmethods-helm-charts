@@ -1,0 +1,20 @@
+image:
+  tag: "11.1"
+  repository: ibmwebmethods.azurecr.io/apigateway-minimal
+
+appVersion: "11.1"
+
+apigw:
+  isHomeDir: /opt/softwareag/IntegrationServer
+
+# License Key is not required for 11.x
+skipLicenseKey: true
+
+# Skip Kibana Autostart Parameter for minimal 11.x container images
+skipKibanaAutostartParameter: true
+
+elasticsearch:
+  version: "8.17.3"
+
+kibana:
+  version: "8.17.3"

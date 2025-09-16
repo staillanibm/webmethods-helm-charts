@@ -47,10 +47,11 @@ spec:
       labels:
         app: {{ .Values.applications.datastore.name }}
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       securityContext:
         fsGroup: 1000
       imagePullSecrets:
-          - name: regcred
+          - name: {{ .Values.imagePullSecretName }}
       initContainers:
       - name: init-sysctl
         image: alpine:latest
