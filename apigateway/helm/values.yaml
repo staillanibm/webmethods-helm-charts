@@ -503,6 +503,8 @@ prometheus:
   interval:      10s
   ## -- Only used on ServiceMonitor
   scrapeTimeout: 10s
+  # -- Setup Prometheus scrape protocol. Set value `PrometheusText0.0.4` here if you are using Prometheus server version 3.x. See [Prometheus configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config).
+  fallbackScrapeProtocol:
 
 serviceMonitor:
   # -- Create and enable CRD ServiceMonitor. The default is `false`.
