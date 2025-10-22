@@ -180,7 +180,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `3.2.0` | Added minor changes and example values for API Gateway 11.1 |
 | `3.3.0` | Install Elasticsearch Plugins behind a Proxy. See `extraCmdPluginInstaller` |
 | `3.3.1` | Setting of environment variable in Job template fixed. |
-| `3.4.0` | The Service Monitor supports the setting of `fallbackScrapeProtocol`. This allows newer Prometheus server versions 3.x to scrape metrics from API Gateway. See [Prometheus configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config) for more information.
+| `3.4.0` | The Service Monitor supports the setting of `fallbackScrapeProtocol`. This allows newer Prometheus server versions 3.x to scrape metrics from API Gateway. See [Prometheus configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config) for more information. Set the port `apigw.adminPort` to empty value if you don't want to expose the administration port as a service.|
 
 ## Chart Version `3.0.0`
 
@@ -216,7 +216,7 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Set Pod (anti-) affinity for APIGW. You can use templates inside because `tpl` function is called for rendering. |
-| apigw.adminPort | int | `5555` | The default administration port. Note in a default installation this port will also be used for runtime traffic. |
+| apigw.adminPort | int | `5555` | The default administration port. Note in a default installation this port will also be used for runtime traffic. Set the port to empty value if you don't want to expose the administration port as a service. |
 | apigw.adminSecretKey | string | `""` | The key that holds the admin secret key; defauls to "password" |
 | apigw.adminSecretName | string | `""` | The secret that holds the admin password Depends on secrets.genereateAdminSecret; if true the setting will be ignored. |
 | apigw.apigwAdminService | string | `"apigw-admin-svc"` |  |
