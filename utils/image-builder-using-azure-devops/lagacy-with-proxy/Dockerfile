@@ -41,7 +41,8 @@ RUN \
 #  SAG host=sdc-hq.softwareag.com
 #  IBM host=sdc.webmethods.io
 RUN \
-    echo "ServerURL=https\://sdc.webmethods.io/cgi-bin/dataservewebM`echo ${RELEASE} | sed "s/\.//g"`.cgi"               > installer.script && \
+    cd /opt/softwareag                                                                                                                       && \
+    echo "ServerURL=https\://sdc.webmethods.io/cgi-bin/dataservewebM`echo ${RELEASE} | sed "s/\.//g"`.cgi"                > installer.script && \
     echo "selectedFixes=spro\:all"                                                                                       >> installer.script && \
     echo "InstallProducts=`for item in $(echo ${PRODUCTS} | sed "s/,/ /g");  do printf e2ei/11/.LATEST/*/$item, ; done`" >> installer.script && \ 
     echo "InstallDir=/opt/softwareag"                                                                                    >> installer.script && \
@@ -49,13 +50,16 @@ RUN \
     echo "Username=${EMPOWER_USERNAME}"                                                                                  >> installer.script && \
     echo "Password=${EMPOWER_PASSWORD}"                                                                                  >> installer.script && \
     echo "ProxyHttpHost=`echo "${PROXY}" | awk -F'[[:space:]="/:]+' '{print $2}'`"                                       >> installer.script && \
-    echo "ProxyHttpPort=`echo "${PROXY}" | awk -F'[[:space:]="/:]+' '{print $3}'`"                                       >> installer.script
-
-RUN echo 'Debug Installer script: ' && echo && cat installer.script
+    echo "ProxyHttpPort=`echo "${PROXY}" | awk -F'[[:space:]="/:]+' '{print $3}'`"                                       >> installer.script && \
+    echo 'Debug Installer script: ' && echo && cat installer.script
 
 # Install software ...
-RUN sh installer.bin -readScript installer.script -console
-RUN echo 'Debug installation log ...' && echo && find . -name "installLog.txt" | xargs cat
+RUN \
+    cd /opt/softwareag                                     && \
+    sh installer.bin -readScript installer.script -console && \
+    echo 'Debug installation log ...' && echo && find . -name "installLog.txt" | xargs cat
 
 # Cleanup ...
-RUN rm installer.bin installer.script
+RUN \ 
+    cd /opt/softwareag                                     && \
+    rm installer.bin installer.script
