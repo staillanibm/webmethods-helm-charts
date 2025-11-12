@@ -23,8 +23,9 @@ ARG PROXY
 RUN useradd -ms /bin/bash sagadmin
 
 # Create installation directory ...
-RUN mkdir          /opt/softwareag
-RUN chown sagadmin /opt/softwareag
+RUN mkdir          /opt/softwareag && \
+    chown sagadmin /opt/softwareag && \
+    cd             /opt/softwareag
 
 # Change user context to ...
 USER sagadmin
