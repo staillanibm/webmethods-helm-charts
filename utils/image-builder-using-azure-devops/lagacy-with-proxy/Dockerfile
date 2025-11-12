@@ -19,13 +19,6 @@ ARG PROXY
 #   apt-get upgrade                            -y && \
 #   apt-get install curl                       -y
 
-# Install IBM webMethods Installer ...
-RUN \
-  curl \
-    ${INSTALLER_URL} \
-    --proxy "${PROXY}" \
-    -o installer.bin
-
 # Create user ...
 RUN useradd -ms /bin/bash sagadmin
 
@@ -33,11 +26,21 @@ RUN useradd -ms /bin/bash sagadmin
 RUN mkdir          /opt/softwareag
 RUN chown sagadmin /opt/softwareag
 
+# Change user context to ...
+USER sagadmin
+
+# Install IBM webMethods Installer ...
+RUN \
+  curl \
+    ${INSTALLER_URL} \
+    --proxy "${PROXY}" \
+    -o installer.bin
+
 # Create script for IBM webMethods Installer ...
 #  SAG host=sdc-hq.softwareag.com
 #  IBM host=sdc.webmethods.io
 RUN \
-    echo "ServerURL=https\://sdc.webmethods.io/cgi-bin/dataservewebM`echo ${RELEASE} | sed "s/\.//g"`.cgi"            > installer.script && \
+    echo "ServerURL=https\://sdc.webmethods.io/cgi-bin/dataservewebM`echo ${RELEASE} | sed "s/\.//g"`.cgi"               > installer.script && \
     echo "selectedFixes=spro\:all"                                                                                       >> installer.script && \
     echo "InstallProducts=`for item in $(echo ${PRODUCTS} | sed "s/,/ /g");  do printf e2ei/11/.LATEST/*/$item, ; done`" >> installer.script && \ 
     echo "InstallDir=/opt/softwareag"                                                                                    >> installer.script && \
@@ -50,14 +53,8 @@ RUN \
 RUN echo 'Debug Installer script: ' && echo && cat installer.script
 
 # Install software ...
-#   and Change user context to ...
-USER sagadmin
 RUN sh installer.bin -readScript installer.script -console
 RUN echo 'Debug installation log ...' && echo && find . -name "installLog.txt" | xargs cat
 
 # Cleanup ...
-USER root
 RUN rm installer.bin installer.script
-
-# Work as ...
-USER sagadmin
