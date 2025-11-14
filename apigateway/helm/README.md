@@ -152,6 +152,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 |-----|------|
 | [fluentd-sidecar](../examples/fluentd-sidecar/README.md) | Running API Gateway with Fluentd Sidecar |
 | [house-keeping-job](../examples/house-keeping-job/README.md) | Example to create house keeping job: purge transaction events  |
+| [custom-resource-objects](../examples/custom-resource-objects/README.md) | Example of deploying Custom Resource objects  |
 
 ## Version History
 
@@ -182,6 +183,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `3.3.1` | Setting of environment variable in Job template fixed. |
 | `3.4.0` | The Service Monitor supports the setting of `fallbackScrapeProtocol`. This allows newer Prometheus server versions 3.x to scrape metrics from API Gateway. See [Prometheus configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config) for more information. Set the port `apigw.adminPort` to empty value if you don't want to expose the administration port as a service.|
 | `3.4.1` | Correct ConfigMap name of external Loadbalancer Nginx.|
+| `3.5.0` | Template `cro` for deploying Custom Resource objects added. See example [custom-resource-objects](../examples/custom-resource-objects/README.md). |
 
 ## Chart Version `3.0.0`
 
