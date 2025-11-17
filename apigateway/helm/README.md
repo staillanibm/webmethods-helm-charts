@@ -184,6 +184,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `3.4.0` | The Service Monitor supports the setting of `fallbackScrapeProtocol`. This allows newer Prometheus server versions 3.x to scrape metrics from API Gateway. See [Prometheus configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config) for more information. Set the port `apigw.adminPort` to empty value if you don't want to expose the administration port as a service.|
 | `3.4.1` | Correct ConfigMap name of external Loadbalancer Nginx.|
 | `3.5.0` | Template `cro` for deploying Custom Resource objects added. See example [custom-resource-objects](../examples/custom-resource-objects/README.md). |
+| `3.6.0` | Enhancement in job template. |
 
 ## Chart Version `3.0.0`
 

@@ -51,6 +51,7 @@ helm install wm-mws mywebmethodsserver
 | `1.0.3` | `tpl` function support in `affinity` value added. `topologySpreadConstraints` support added. |
 | `1.0.4` | `priorityClassName` support added. Implementation of `extraConfigMaps`, `extraVolumeMounts` and `extraVolumes` added. |
 | `1.1.0` | Fix and implements `extraEnvs` how other Charts. Supports 64base encoded as binary data for ConfigMaps. Implements `revisionHistoryLimit`. |
+| `1.2.0` | Custom Resource objects are supported. Enhancement in job template to add `extraSpec` options. |
 
 ## Values
 

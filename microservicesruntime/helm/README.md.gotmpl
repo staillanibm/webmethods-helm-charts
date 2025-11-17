@@ -61,6 +61,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | [msr-with-extra-ports](../examples/msr-with-extra-ports/README.md) | Define additional ports in MSR deployment |
 | [msr-with-tls](../examples/msr-with-tls/README.md) | Configure Ingress with TLS |
 | [process-engine](../examples/process-engine/README.md) | Deploy MSR as Process Engine |
+| [schedule-a-restart](../examples/schedule-a-restart/README.md) | Schedule a deployment restart |
 | [service-auditing-monitor](../examples/service-auditing-monitor/README.md) | Deploy MSR as Service Auditing Monitor |
 | [Stakater Reloader](../examples/stakater-reloader/README.md) | Utility to restart MSR pod on configuration changes |
 | [Trading Networks](../examples/trading-networks/README.md) | Deploy Trading Networks in a container environment |
@@ -114,5 +115,6 @@ helm install wm-msr webmethods/microservicesruntime   \
 | `1.0.7` | `priorityClassName` support added. |
 | `1.0.8` | Setting of environment variable in Job template fixed. |
 | `1.0.9` | Added new option `terminationGracePeriodSeconds`. Fix lifecycle indentation. |
+| `1.1.0` | Custom Resource objects are supported. Enhancement in job template to add `extraSpec` options. See [schedule-a-restart](../examples/schedule-a-restart/README.md). |
 
 {{ template "chart.valuesSection" . }}
