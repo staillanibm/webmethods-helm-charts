@@ -42,11 +42,9 @@ spec:
   {{ if $job.schedule }}
   jobTemplate:
     spec:
-
       {{- with $job.extraSpec }}
 {{ tpl (toYaml . ) $context | indent 6 }}
       {{- end }}
-
       template:
         metadata:
           name: {{ $fullName }}-{{ $job.name }}
@@ -58,7 +56,7 @@ spec:
         spec:
           {{- if hasKey $job "serviceAccount" }}
           {{- if hasKey $job.serviceAccount "name" }}
-          serviceAccountName: {{ $job.serviceAccount.name }}
+          serviceAccountName: {{ tpl ($job.serviceAccount.name) $context }}
           {{- else }}
           serviceAccountName: {{ $job.name }}
           {{- end }}
@@ -130,6 +128,9 @@ spec:
 
   {{ else }}
 
+  {{- with $job.extraSpec }}
+{{ tpl (toYaml . ) $context | indent 2 }}
+  {{- end }}
   template:
     metadata:
       name: {{ $fullName }}-{{ $job.name }}
@@ -139,12 +140,9 @@ spec:
           {{- toYaml $extraLabels | nindent 8 }}
          {{- end }}
     spec:
-      {{- with $job.extraSpec }}
-{{ tpl (toYaml . ) $context | indent 6 }}
-      {{- end }}
       {{- if hasKey $job "serviceAccount" }}
       {{- if hasKey $job.serviceAccount "name" }}
-      serviceAccountName: {{ $job.serviceAccount.name }}
+      serviceAccountName: {{ tpl ($job.serviceAccount.name) $context }}
       {{- else }}
       serviceAccountName: {{ $job.name }}
       {{- end }}
