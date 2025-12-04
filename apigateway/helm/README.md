@@ -22,6 +22,31 @@ helm install <your-release-name> webmethods/apigateway -f my-values.yaml --set-f
 
 This will install the API Gateway cluster with the following default configuration as depicted above. Make sure that the licenseKey.xml points to a valid license file.
 
+## Important Notes
+
+### Version 11.x Settings
+
+The API Gateway Minimal Image does not have a default instance folder any more. Set `--set apigw.isHomeDir=/opt/softwareag/IntegrationServer` to change the default IS home directory correctly.
+Please also check the 11.x example here: [example-11](../../examples/README.md)
+
+### Licenses for 10.15
+
+Up until version 10.15, API Gateway requires a valid license key. If you have a license that expires soon, please either update to fix YAI_10.15_Fix23 (Included in image tag: 10.15.0.23)
+
+OR follow the instructions at https://community.ibm.com/community/user/blogs/marianne-fuller/2024/11/20/webmethods-product-offering-details download new license keys, replace your existing license key via:
+
+```bash
+kubectl create configmap apigw-license-config --from-file=licenseKey.xml=<NEW API GATEWAY LICENSEKEY FILE> --dry-run=client -o yaml | kubectl replace -f -
+```
+
+### Licenses for >= 11.x
+
+API Gateway version >= 11.x does no longer require a license key. You can skip the license config map by providing `--set skipLicenseKey=true`or provide this as part of your custom values file. See also Important Notes.
+
+### ElasticSearch & Kibana Support in version 11.x and upwards
+
+API Gateway in version >= 11.x does not include Elastic Search or Kibana anymore. Please set the `--set skipKibanaAutostartParameter=true` to bypass templating of corresponding objects.
+
 ## Prerequisites
 
 ### ECK / Elasticsearch
@@ -45,13 +70,13 @@ For more information please see: https://www.elastic.co/guide/en/cloud-on-k8s/cu
 
 ## Licenses
 
-API Gateway requires a license file. These license is supposed to be
+API Gateway 10.15 requires a license file. These license is supposed to be
 provided as configmap.
 
 Hence before running `helm install` create the configmap:
 
 ```
-kubectl create configmap apigw-license-config --from-file=licensekey=<your path to API Gateway license file>
+kubectl create configmap apigw-license-config --from-file=licenseKey.xml=<your path to API Gateway license file>
 ```
 
 Optionally you can directly provide the license file at the time of running `helm install`:
@@ -60,7 +85,10 @@ Optionally you can directly provide the license file at the time of running `hel
 helm install <your-release-name> webmethods/apigateway -f my-values.yaml --set-file license=licenseKey.xml
 ```
 
-Note: the license key config map will not be removed when the helm release is deleted.
+Note:
+
+- The license key config map will not be removed when the helm release is deleted.
+- API Gateway version >= 11.x does no longer require a license key. You can skip the license config map by providing `--set skipLicenseKey=true`or provide this as part of your custom values file. See also Important Notes.
 
 ## Image Pull Secret
 
