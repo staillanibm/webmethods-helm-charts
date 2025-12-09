@@ -122,8 +122,16 @@ spec:
             {{- toYaml .Values.imagePullSecrets | nindent 12 }}
           containers:
           - name: elasticsearch
+            {{- if .Values.elasticsearch.defaultNodeSet.extraVolumeMounts }}
+            volumeMounts:
+              {{- toYaml .Values.elasticsearch.defaultNodeSet.extraVolumeMounts | nindent 14 }}
+            {{- end }}
             resources:
               {{- toYaml .Values.elasticsearch.resources | nindent 14 }}
+          volumes:
+            {{- if .Values.elasticsearch.defaultNodeSet.extraVolumes }}
+            {{- tpl ( toYaml .Values.elasticsearch.defaultNodeSet.extraVolumes ) $ | nindent 12 }}
+            {{- end }}
           initContainers:
           {{- if and .Values.elasticsearch.defaultNodeSet.setMaxMapCount .Values.elasticsearch.defaultNodeSet.memoryMapping }}
           - name: sysctl
@@ -149,6 +157,11 @@ spec:
               cpu: 500m
             limits:
               memory: 100Mi
+          {{- end }}
+          {{- if .Values.elasticsearch.defaultNodeSet.extraInitContainers }}
+          {{- range $init := .Values.elasticsearch.defaultNodeSet.extraInitContainers }}
+          - {{- tpl (toYaml . ) $context  | nindent 12 }}
+          {{- end }}
           {{- end }}
   {{- end }}
 {{- end }}
