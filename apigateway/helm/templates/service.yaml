@@ -122,3 +122,59 @@ spec:
   selector:
     {{- include "common.labels.matchLabels" . | nindent 4}}
 {{- end }}
+
+{{- if .Values.externalService.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "common.names.fullname" . }}-external
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    {{- with .Values.extraLabels -}}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    service-name: {{ include "common.names.fullname" . }}-external
+spec:
+  type: {{ .Values.service.type }}
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 1000
+  ports:
+  - port: {{ int .Values.apigw.runtimeExternalPort }}
+    protocol: TCP
+    targetPort: {{ int .Values.apigw.runtimeExternalPort }}
+    name: externalport
+    {{- if (eq .Values.service.type "ClusterIP") }}
+    nodePort: null
+    {{- end }}
+  selector:
+    {{- include "common.labels.matchLabels" . | nindent 4}}
+{{- end }}
+---
+{{ with .Values.external }}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: {{ include "common.names.fullname" $ }}-nodeport{{ .k8sDomain }}
+  name: {{ include "common.names.fullname" $ }}-nodeport
+  labels:
+    {{- include "common.labels.standard" $ | nindent 4 }}
+    {{- with $.Values.extraLabels -}}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    service-name: {{ include "common.names.fullname" $ }}-nodeport
+spec:
+  type: NodePort
+  ports:
+    - name: http-nodeport
+      protocol: TCP
+      port: {{ .ports.registration }}
+      targetPort: {{ .ports.registration }}
+      nodePort: {{ .ports.node }}
+  externalTrafficPolicy: {{ default "Cluster" .externalTrafficPolicy }}
+  selector:
+    {{- include "common.labels.matchLabels" $ | nindent 4}}
+{{- end }}
