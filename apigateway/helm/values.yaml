@@ -130,6 +130,26 @@ grpcService:
   dnsExternal: false
   hostname: ""
 
+# -- external service for reverse invoke setup.
+externalService:
+  enabled: false
+
+# -- DMZ setup with external traffice and reverse-invoke setup using node port.
+# 
+# nodePortService:  "apigw-nodeport-svc"
+# k8sDomain:        ".k8s.dmz.sew"
+# ports:
+#   node:           30000 # node port for reverse invoke
+#   registration:   7555  # port for registration of internal server
+external: {}
+  # # is this a external gateway?
+  # #
+  # k8sDomain:        ".k8s.dmz.sew"
+  # ports:
+  #   node:           30000 # node port for reverse invoke
+  #   registration:   7555  # port for registration of internal server
+  # externalTrafficPolicy: "Cluster" #
+
 # multiple ingresses for ui, admin, ext and rt
 ingresses:
   ui:
@@ -315,6 +335,13 @@ extraInitContainers: []
 
 # -- Extra config maps for additional configurations such as extra ports, etc.
 extraConfigMaps: []
+
+# -- Extra PVCs for backup, etc.
+extraPVCs: []
+# - name: extras
+#   accessMode: ReadWriteOnce
+#   storageRequest: 1Gi
+#   storageClassName: standard
 
 # -- lifecycle hooks to execute on preStop / postStart,...
 # preStop:
@@ -921,3 +948,8 @@ routes:
     annotations:
     # Enter hostname
     hostName: ""
+
+# -- Job metadata label suffix and prefix, to avoid being selected by service selectors from main gateway service selectors.
+jobsMetaData:
+  labelSuffix: "-job"
+  labelPrefix: ""
