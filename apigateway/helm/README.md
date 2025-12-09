@@ -213,6 +213,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `3.4.1` | Correct ConfigMap name of external Loadbalancer Nginx.|
 | `3.5.0` | Template `cro` for deploying Custom Resource objects added. See example [custom-resource-objects](../examples/custom-resource-objects/README.md). |
 | `3.6.0` | Enhancement in job template. |
+| `3.6.1` | Added selector suffix / prefix for Jobs |
 
 ## Chart Version `3.0.0`
 
@@ -320,11 +321,14 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | elasticsearch.tlsSecretName | string | `""` | The name of the elasticsearch secret. By default it will created by the fullname + "-es-tls-secret" if tlsEnabled is set to true. |
 | elasticsearch.topologySpreadConstraints | object | `{}` | Set Pod topology spread constraints for ElasticSearch. You can use templates inside because `tpl` function is called for rendering. |
 | elasticsearch.version | string | `"8.2.3"` | The ECK version to be used |
+| external | object | `{}` | DMZ setup with external traffice and reverse-invoke setup using node port.  nodePortService:  "apigw-nodeport-svc" k8sDomain:        ".k8s.dmz.sew" ports:   node:           30000 # node port for reverse invoke   registration:   7555  # port for registration of internal server |
+| externalService | object | `{"enabled":false}` | external service for reverse invoke setup. |
 | extraConfigMaps | list | `[]` | Extra config maps for additional configurations such as extra ports, etc. |
 | extraContainers | list | `[]` | Extra containers which should run in addition to the main container as a sidecar - name: do-something   image: busybox   command: ['do', 'something'] |
 | extraEnvs | object | `{}` | Exta environment properties to be passed on to the container |
 | extraInitContainers | list | `[]` | Extra init containers that are executed before starting the main container - name: do-something   image: busybox   command: ['do', 'something'] |
 | extraLabels | object | `{}` | Extra Labels for API Gateway |
+| extraPVCs | list | `[]` | Extra PVCs for backup, etc. |
 | extraVolumeMounts | list | `[]` | Extra volume mounts - name: extras   mountPath: /usr/share/extras   readOnly: true |
 | extraVolumes | list | `[]` | Exta volumes that should be mounted. - name: extras   emptyDir: {} |
 | fullnameOverride | string | `""` | Overwrites full workload name. As default, the workload name is release name + '-' + Chart name. |
@@ -400,6 +404,7 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | ingresses.ui.tls[0].secretName | string | `nil` |  |
 | ingresses.ui.tls[0].secretProviderEnabled | bool | `false` |  |
 | ingresses.ui.tls[0].secretProviderSecretName | string | `nil` |  |
+| jobsMetaData | object | `{"labelPrefix":"","labelSuffix":"-job"}` | Job metadata label suffix and prefix, to avoid being selected by service selectors from main gateway service selectors. |
 | kibana.affinity | object | `{}` | Set Pod (anti-) affinity for Kibana. You can use templates inside because `tpl` function is called for rendering. |
 | kibana.allowAnonymousStatus | bool | `true` | Enable anonymous access to /api/status. |
 | kibana.annotations | object | `{}` | Annotations for Kibana |
