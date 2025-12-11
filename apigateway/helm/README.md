@@ -214,6 +214,9 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `3.5.0` | Template `cro` for deploying Custom Resource objects added. See example [custom-resource-objects](../examples/custom-resource-objects/README.md). |
 | `3.6.0` | Enhancement in job template. |
 | `3.6.1` | Added selector suffix / prefix for Jobs |
+| `3.6.2` | Extra PVCs |
+| `3.6.3` | Elasticsearch extra volumes for Backup added |
+| `3.6.4` | Fixes for job suffix and prefix for Jobs |
 
 ## Chart Version `3.0.0`
 
