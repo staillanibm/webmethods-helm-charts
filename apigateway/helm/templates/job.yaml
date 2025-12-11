@@ -23,7 +23,7 @@
 {{- $prefix = default .Values.jobsMetaData.labelPrefix "" }}
 {{- end }}
 {{- $fullName := include "common.names.fullname" . -}}
-{{- $labels   := include "common.labels.standard" . -}}
+{{- $labels   := include "common.labels.standard" (list . $prefix  $suffix ) -}}
 {{- $imagePullSecrets := .Values.imagePullSecrets -}}
 {{- $extraLabels      := .Values.extraLabels      -}}
 {{- $context := . }}
