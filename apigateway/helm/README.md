@@ -181,6 +181,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | [fluentd-sidecar](../examples/fluentd-sidecar/README.md) | Running API Gateway with Fluentd Sidecar |
 | [house-keeping-job](../examples/house-keeping-job/README.md) | Example to create house keeping job: purge transaction events  |
 | [custom-resource-objects](../examples/custom-resource-objects/README.md) | Example of deploying Custom Resource objects  |
+| [e2e-security](../examples/e2e-security/README.md) | End to end security deployment  |
 
 ## Version History
 
@@ -217,6 +218,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | `3.6.2` | Extra PVCs |
 | `3.6.3` | Elasticsearch extra volumes for Backup added |
 | `3.6.4` | Fixes for job suffix and prefix for Jobs |
+| `4.0.0` | App version switched to 11.1, secure connection between GW and Kibana, e2e security example |
 
 ## Chart Version `3.0.0`
 

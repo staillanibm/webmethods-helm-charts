@@ -1,0 +1,147 @@
+# ==============================================================================
+# STEP 1: Create Self-Signed Root CA Issuer
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+
+---
+# ==============================================================================
+# STEP 2: Create CA Certificate (IWHI Root CA)
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: iwhi-root-ca
+spec:
+  isCA: true
+  commonName: IWHI Root CA
+  secretName: iwhi-root-ca-secret
+  duration: 87600h  
+  renewBefore: 720h  
+  subject:
+    organizations:
+      - IWHI
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+
+---
+# ==============================================================================
+# STEP 3: Create CA Issuer
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: iwhi-ca-issuer
+spec:
+  ca:
+    secretName: iwhi-root-ca-secret
+
+---
+# ==============================================================================
+# STEP 4: Elasticsearch Certificate with Keystores
+# ==============================================================================
+# This single certificate generates all required files:
+# - Elasticsearch: tls.crt, tls.key, ca.crt
+# - API Gateway: truststore.jks (keystore.jks also created but unused)
+# - Kibana: truststore.p12 (keystore.p12 also created but unused)
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: elasticsearch-tls
+spec:
+  secretName: gw-apigateway-es-tls-secret
+  commonName: gw-apigateway-es-http
+  duration: 87600h
+  renewBefore: 720h
+  subject:
+    organizations:
+      - IWHI
+  dnsNames:
+    - gw-apigateway-es-http
+    - gw-apigateway-es-http.apigateway-tls
+    - gw-apigateway-es-http.apigateway-tls.svc
+    - gw-apigateway-es-http.apigateway-tls.svc.cluster.local
+    - "*.es.apigateway-tls.svc.cluster.local"
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth
+  issuerRef:
+    name: iwhi-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  keystores:
+    jks:
+      create: true
+      passwordSecretRef:
+        name: cert-secret
+        key: password
+    pkcs12:
+      create: true
+      passwordSecretRef:
+        name: cert-secret
+        key: password
+
+---
+# ==============================================================================
+# STEP 5: Kibana Certificate with PKCS12 Keystore
+# ==============================================================================
+# Certificat dédié pour Kibana avec son propre CN/SAN
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kibana-tls
+spec:
+  secretName: gw-apigateway-kb-tls-secret
+  commonName: gw-apigateway-kb-http
+  duration: 87600h
+  renewBefore: 720h
+  subject:
+    organizations:
+      - IWHI
+  dnsNames:
+    - gw-apigateway-kb-http
+    - gw-apigateway-kb-http.apigateway
+    - gw-apigateway-kb-http.apigateway.svc
+    - gw-apigateway-kb-http.apigateway.svc.cluster.local
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+  issuerRef:
+    name: iwhi-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  keystores:
+    pkcs12:
+      create: true
+      passwordSecretRef:
+        name: cert-secret
+        key: password

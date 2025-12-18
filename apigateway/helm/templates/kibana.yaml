@@ -75,8 +75,13 @@ spec:
     {{- end }}
   http:
     tls:
+      {{- if .Values.kibana.tls.certificateSecretName }}
+      certificate:
+        secretName: {{ .Values.kibana.tls.certificateSecretName }}
+      {{- else }}
       selfSignedCertificate:
         disabled: true
+      {{- end }}
   elasticsearchRef:
     name: {{ include "common.names.fullname" . }}
   podTemplate:

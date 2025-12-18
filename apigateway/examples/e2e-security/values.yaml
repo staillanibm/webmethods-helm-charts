@@ -1,0 +1,161 @@
+replicaCount: 1
+
+image:
+  repository: ibmwebmethods.azurecr.io/apigateway-minimal
+  pullPolicy: IfNotPresent
+  tag: "11.1.0.7"
+
+imagePullSecrets:
+  - name: regcred
+
+skipLicenseKey: true
+skipKibanaAutostartParameter: true
+
+podSecurityContext: {}
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  runAsNonRoot: true
+
+ingresses:
+  ui:
+    defaultHost: "apigateway-ui.sttlab.local"
+    enabled: true
+    className: "nginx"
+    tls:
+      - secretName: "tls-cert"
+  rt:
+    defaultHost: "apigateway-rt.sttlab.local"
+    enabled: true
+    className: "nginx"
+    tls:
+      - secretName: "tls-cert"
+  admin:
+    defaultHost: "apigateway-admin.sttlab.local"
+    enabled: true
+    className: "nginx"
+    tls:
+      - secretName: "tls-cert"
+
+resources:
+  apigwContainer:
+    requests:
+      cpu: 500m
+      memory: 4Gi
+    limits:
+      cpu: 2
+      memory: 8Gi
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+serviceMonitor:
+  enabled: false
+
+
+metering:
+  enabled: false
+
+elasticsearch:
+  deploy: true
+  version: 8.17.3
+  storageClassName: "local-path"
+  tlsEnabled: true
+  certificateSecretName: "gw-apigateway-es-tls-secret"
+
+  defaultNodeSet:
+    count: 1
+
+# Configuration API Gateway
+apigw:
+  isHomeDir: "/opt/softwareag/IntegrationServer"
+
+  # Secret containing truststore password (REQUIRED to verify ES certificate)
+  elastictrustStoreName: "gw-apigateway-es-truststore-secret"
+
+  # Secret containing keystore password (template requires it even if not used in simple TLS)
+  elastickeyStoreName: "gw-apigateway-es-keystore-secret"
+
+  # Keep admin password in application.properties (for Integration Server)
+  applicationProperties: |
+    user.Administrator.password=$env{ADMINISTRATOR_PASSWORD}
+
+  # Override default configSources
+  configSources:
+    elasticsearch:
+      tenantId: default
+      hosts: "gw-apigateway-es-http:9200"
+    kibana:
+      dashboardInstance: "https://gw-apigateway-kb-http:5601"
+    cluster:
+      aware: false
+      name: IgniteCluster
+      sessTimeout: 60
+      actionOnStartupError: standalone
+      ignite:
+        k8sServiceName: "gw-apigateway-rt"
+        k8sNamespace: "apigateway"
+        discoveryPort: 10100
+        communicationPort: 10400
+
+extraVolumeMounts:
+  - name: elastic-tls
+    mountPath: /opt/softwareag/common/conf/ssl/truststore.jks
+    subPath: truststore.jks
+    readOnly: true
+  - name: elastic-tls
+    mountPath: /opt/softwareag/common/conf/ssl/keystore.jks
+    subPath: keystore.jks
+    readOnly: true
+
+extraEnvs:
+  # Elasticsearch connection configuration via environment variables
+  # Using pg.gateway.dataStore.* properties (not pg.gateway.elasticsearch.*)
+  - name: apigw_dataStore_hosts
+    value: "gw-apigateway-es-http:9200"
+  - name: apigw_dataStore_https_enabled
+    value: "true"
+  - name: apigw_dataStore_https_enforceHostnameVerification
+    value: "true"
+  - name: apigw_dataStore_https_truststoreFilepath
+    value: "/opt/softwareag/common/conf/ssl/truststore.jks"
+  - name: apigw_dataStore_https_keystoreFilepath
+    value: "/opt/softwareag/common/conf/ssl/keystore.jks"
+  - name: apigw_dataStore_https_truststorePassword
+    valueFrom:
+      secretKeyRef:
+        name: gw-apigateway-es-truststore-secret
+        key: password
+  - name: apigw_dataStore_https_keystorePassword
+    valueFrom:
+      secretKeyRef:
+        name: gw-apigateway-es-keystore-secret
+        key: password
+  # Disable SSL hostname verification for Kibana (self-signed cert)
+  - name: JAVA_OPTS
+    value: "-Dcom.softwareag.apigateway.kibana.ssl.verifyHostname=false"
+
+kibana:
+  version: 8.17.3
+  count: 1
+  tls:
+    enabled: false
+    certificateSecretName: "gw-apigateway-kb-tls-secret"
+  readinessProbe:
+    httpGet:
+      path: /status
+      port: 5601
+      scheme: HTTPS
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+
