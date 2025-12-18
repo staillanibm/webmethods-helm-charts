@@ -228,6 +228,37 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+# -- Extra services to expose additional ports
+extraServices: []
+#  - name: api-port
+#    type: ClusterIP
+#    ports:
+#      - port: 6643
+#        targetPort: api-port
+#        protocol: TCP
+#        name: api-port
+
+# -- Extra ingresses for additional services with advanced TLS termination options
+extraIngresses: []
+#  - name: api-port
+#    enabled: true
+#    className: "nginx"
+#    tlsMode: termination  # Options: "passthrough" or "termination"
+#    backendCaSecret: api-port-tls  # Secret containing CA cert for backend validation (termination mode)
+#    backendCaName: "msr-api.local"  # SNI name for backend validation (optional)
+#    annotations: {}
+#    hosts:
+#      - host: "msr-api.local"
+#        paths:
+#          - path: /
+#            pathType: Prefix
+#            port: 6643
+#            serviceName: api-port
+#    tls:
+#      - secretName: api-port-tls
+#        hosts:
+#          - "msr-api.local"
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little

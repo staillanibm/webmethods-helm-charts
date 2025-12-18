@@ -51,6 +51,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 |-----|------|
 | [external-postgresql-db](../examples/external-postgresql-db/README.md) | Using MSR with external PostgresQL database |
 | [msr-defaults](../examples/msr-defaults/README.md) | Recommended default application properties|
+| [msr-e2e-security](../examples/msr-e2e-security/README.md) | End-to-end security with cert-manager TLS, extra ports/ingresses, UM and Kafka integration |
 | [Fluentd Sidecar](../examples/msr-fluentd-sidecar/README.md) | Running with Fluentd Sidecar |
 | [msr-master-password](../examples/msr-master-password/README.md) | Setting master password |
 | [msr-post-init](../examples/msr-post-init/README.md) | Performs *post-init* actions after startup, e.g. deploy assets to Universal Messaging |

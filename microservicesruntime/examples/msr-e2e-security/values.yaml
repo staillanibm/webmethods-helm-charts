@@ -1,0 +1,209 @@
+replicaCount: 1
+
+
+image:
+  repository: "ghcr.io/staillanibm/obs-kafka-demo"
+  tag:        "1.0.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: regcred
+
+microservicesruntime:
+
+  licenseKeyProvided: false
+
+  memoryHeap:
+    min: "512M"
+    max: "1500M"
+
+  propertiesFile: 
+    content: |
+      # Administrator password
+      user.Administrator.password=$secret{MSR_ADMIN_PASSWORD}
+
+      # DEFAULT_IS_KEYSTORE configuration override
+      keystore.DEFAULT_IS_KEYSTORE.ksLocation=/opt/softwareag/common/conf/keystore.jks
+      keystore.DEFAULT_IS_KEYSTORE.ksPassword=$secret{ADMIN_PORT_KEYSTORE_PASSWORD}
+      keystore.DEFAULT_IS_KEYSTORE.keyAlias.ssos.keyAliasPassword=$secret{ADMIN_PORT_KEYSTORE_PASSWORD}
+      keystore.DEFAULT_IS_KEYSTORE.ksStoreProviderName=SUN
+      keystore.DEFAULT_IS_KEYSTORE.ksType=JKS
+
+      # API Port Keystore configuration
+      keystore.API_PORT_KEYSTORE.ksLocation=/certs/api-port/keystore.jks
+      keystore.API_PORT_KEYSTORE.keyAlias.api-port-tls.keyAliasPassword=$secret{API_PORT_KEYSTORE_PASSWORD}
+      keystore.API_PORT_KEYSTORE.ksPassword=$secret{API_PORT_KEYSTORE_PASSWORD}
+      keystore.API_PORT_KEYSTORE.ksType=JKS
+      keystore.API_PORT_KEYSTORE.ksStoreProviderName=SUN
+
+      # Event Streams Truststore configuration
+      truststore.ES_TRUSTSTORE.ksLocation=/certs/es/es-cert.p12
+      truststore.ES_TRUSTSTORE.ksPassword=$secret{ES_TRUSTSTORE_PASSWORD}
+      truststore.ES_TRUSTSTORE.ksStoreProviderName=SUN
+      truststore.ES_TRUSTSTORE.ksType=PKCS12
+
+      # Event Streams configuration (via global variables)
+      globalvariable.ES_BOOTSTRAP_URL.value=$secret{ES_BOOTSTRAP_URL}
+      globalvariable.ES_USERNAME.value=$secret{ES_USERNAME}
+      globalvariable.ES_PASSWORD.value=$secret{ES_PASSWORD}
+      globalvariable.ES_PASSWORD.isSecure=true
+
+      # UM Truststore configuration
+      truststore.UM_TRUSTSTORE.ksLocation=/certs/um/truststore.jks
+      truststore.UM_TRUSTSTORE.ksPassword=$secret{UM_TRUSTSTORE_PASSWORD}
+      truststore.UM_TRUSTSTORE.ksStoreProviderName=SUN
+      truststore.UM_TRUSTSTORE.ksType=JKS
+
+      # UM JNDI Provider configuration
+      jndi.DEFAULT_IS_JNDI_PROVIDER.providerURL=$secret{UM_URL}
+      jndi.DEFAULT_IS_JNDI_PROVIDER.securityPrincipal=$secret{UM_USERNAME}
+      jndi.DEFAULT_IS_JNDI_PROVIDER.securityCredentials=$secret{UM_PASSWORD}
+      jndi.DEFAULT_IS_JNDI_PROVIDER.trustStoreAlias=UM_TRUSTSTORE
+      jndi.DEFAULT_IS_JNDI_PROVIDER.trustStoreProp=nirvana.ssl.truststore.path
+      jndi.DEFAULT_IS_JNDI_PROVIDER.trustStorePwdProp=nirvana.ssl.truststore.pass
+
+      # UM JMS configuration
+      jms.DEFAULT_IS_JMS_CONNECTION.enabled=true
+      jms.DEFAULT_IS_JMS_CONNECTION.csqSize=0
+      jms.DEFAULT_IS_JMS_CONNECTION.jndi_jndiAliasName=DEFAULT_IS_JNDI_PROVIDER
+      jms.DEFAULT_IS_JMS_CONNECTION.jndi_connectionFactoryLookupName=k8s_um
+      jms.DEFAULT_IS_JMS_CONNECTION.jndi_automaticallyCreateUMAdminObjects=true
+      jms.DEFAULT_IS_JMS_CONNECTION.producerMaxRetryAttempts=30
+      jms.DEFAULT_IS_JMS_CONNECTION.producerRetryInterval=1000
+
+      # UM messaging configuration
+      messaging.IS_UM_CONNECTION.enabled=true
+      messaging.IS_UM_CONNECTION.CLIENTPREFIX=J_jRQtEolDEurgAVIwwwADXaZQs_
+      messaging.IS_UM_CONNECTION.url=$secret{UM_URL}
+      messaging.IS_UM_CONNECTION.clientAuthType=basic
+      messaging.IS_UM_CONNECTION.trustStoreAlias=UM_TRUSTSTORE
+      messaging.IS_UM_CONNECTION.user=$secret{UM_USERNAME}
+      messaging.IS_UM_CONNECTION.password=$secret{UM_PASSWORD}
+      messaging.IS_UM_CONNECTION.csqSize="-1"
+
+
+
+secretMounts:
+  - name: msr-secrets
+    secretName: msr-secrets
+    path: /etc/secrets
+  - name: event-streams-tls
+    secretName: event-streams-tls
+    path: /certs/es
+  - name: api-port-tls
+    secretName: api-port-tls
+    path: /certs/api-port
+    items:
+      - key: keystore.jks
+        path: keystore.jks
+  - name: um-tls
+    secretName: um-nhps-tls
+    path: /certs/um
+    items:
+      - key: truststore.jks
+        path: truststore.jks
+
+secretVolumes:
+  - name: msr-secrets
+    secretName: msr-secrets
+  - name: event-streams-tls
+    secretName: event-streams-tls
+  - name: api-port-tls
+    secretName: api-port-tls
+  - name: um-tls
+    secretName: um-nhps-tls
+
+extraVolumes:
+  - name: admin-port-tls
+    secret:
+      secretName: admin-port-tls
+
+extraVolumeMounts:
+  - name: admin-port-tls
+    mountPath: /opt/softwareag/common/conf/keystore.jks
+    subPath: keystore.jks
+    readOnly: true
+
+extraInitContainers: []
+
+
+serviceAccount:
+  create: true
+
+
+podSecurityContext:
+  fsGroup: null
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  runAsNonRoot: true
+  #readOnlyRootFilesystem: true
+  #runAsUser: 1000
+
+extraPorts:
+  - containerPort: 6643
+    name: api-port
+    protocol: TCP
+
+extraServices:
+  - name: api-port
+    type: ClusterIP
+    ports:
+      - port: 6643
+        targetPort: api-port
+        protocol: TCP
+        name: api-port
+
+ingress:
+  enabled: false
+  defaultHostname: msr.local
+  className: "nginx"
+  hosts:
+    - host: "msr.local"
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 5555
+  tls:
+    - secretName: tls-cert
+
+extraIngresses:
+  - name: api-port
+    enabled: true
+    className: "nginx"
+    tlsMode: termination  # Options: "passthrough" or "termination"
+    backendCaSecret: api-port-tls  # Secret containing CA cert for backend validation (termination mode)
+    backendCaName: "msr-api.local"  # SNI name for backend validation (optional)
+    annotations: {}
+    hosts:
+      - host: "msr-api.local"
+        paths:
+          - path: /
+            pathType: Prefix
+            port: 6643
+            serviceName: api-port
+    tls:
+      - secretName: api-port-tls
+        hosts:
+          - "msr-api.local"
+
+resources:
+  msrContainer:
+    limits:
+      cpu: 1
+      memory: 2048Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+metering:
+  enabled: false

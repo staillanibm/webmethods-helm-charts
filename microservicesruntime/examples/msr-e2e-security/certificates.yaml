@@ -1,0 +1,59 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: admin-port-tls
+spec:
+  secretName: admin-port-tls
+  duration: 8760h 
+  renewBefore: 720h 
+  subject:
+    organizations:
+      - iwhi
+  commonName: msr.integration.svc.cluster.local
+  dnsNames:
+    - localhost
+    - msr-microservicesruntime
+    - msr-microservicesruntime.integration
+    - msr-microservicesruntime.integration.svc
+    - msr-microservicesruntime.integration.svc.cluster.local
+  issuerRef:
+    kind: ClusterIssuer
+    name: selfsigned-issuer
+  keystores:
+    jks:
+      create: true
+      passwordSecretRef:
+        name: msr-secrets
+        key: ADMIN_PORT_KEYSTORE_PASSWORD
+      alias: ssos
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-port-tls
+spec:
+  secretName: api-port-tls
+  duration: 8760h 
+  renewBefore: 720h 
+  subject:
+    organizations:
+      - iwhi
+  commonName: msr.integration.svc.cluster.local
+  dnsNames:
+    - localhost
+    - msr-microservicesruntime-api-port
+    - msr-microservicesruntime-api-port.integration
+    - msr-microservicesruntime-api-port.integration.svc
+    - msr-microservicesruntime-api-port.integration.svc.cluster.local
+  issuerRef:
+    kind: ClusterIssuer
+    name: selfsigned-issuer
+  keystores:
+    jks:
+      create: true
+      passwordSecretRef:
+        name: msr-secrets
+        key: API_PORT_KEYSTORE_PASSWORD
+      alias: api-port-tls
