@@ -76,11 +76,18 @@ spec:
             {{- toYaml .Values.resources.devportalContainer | nindent 12 }}
           ports:
             - containerPort: {{ .Values.devportal.port }}
+              name: ui-http
+              protocol: TCP
+            {{- if .Values.devportal.tls.ui.enabled }}
+            - containerPort: {{ .Values.devportal.tls.ui.port }}
+              name: ui-https
+              protocol: TCP
+            {{- end }}
           env:
-            - name: SPRING_ELASTICSEARCH_REST_URIS            # supports version 10.15 
-              value: {{ include "developerportal.elasticservice" . }}:9200
+            - name: SPRING_ELASTICSEARCH_REST_URIS            # supports version 10.15
+              value: {{ if .Values.devportal.tls.elastic.enabled }}https://{{ end }}{{ include "developerportal.elasticservice" . }}:9200
             - name: SPRING_ELASTICSEARCH_URIS                 # supports version 11.0
-              value: {{ include "developerportal.elasticservice" . }}:9200
+              value: {{ if .Values.devportal.tls.elastic.enabled }}https://{{ end }}{{ include "developerportal.elasticservice" . }}:9200
             - name: PORTAL_SERVER_CACHE_DISTRIBUTED_CLUSTER_PEERS_0
               value: {{ include "common.names.fullname" . }}-svc:{{ .Values.devportal.clusterPorts.start }}..{{ .Values.devportal.clusterPorts.end }}              
             - name: PORTAL_SERVER_CACHE_DISTRIBUTED_ENABLED
@@ -89,9 +96,182 @@ spec:
             - name: PORTAL_SERVER_CONFIG_HEADERS_CONTENT_SECURITY_POLICY
               value: "default-src 'self'; img-src * 'self' data:; object-src 'none'; child-src * mailto: tel: ms-word:; script-src 'self' 'unsafe-inline' {{ .Values.devportal.cspDomains }}; style-src 'self' 'unsafe-inline' {{ .Values.devportal.cspDomains }}; form-action 'self' {{ .Values.devportal.cspDomains }}; frame-ancestors 'self'; connect-src 'self';"
             {{- end }}
+            {{- if .Values.devportal.tls.elastic.enabled }}
+            - name: DATASTORE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "developerportal.elasticsecret" . }}-es
+                  key: username
+            - name: DATASTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "developerportal.elasticsecret" . }}-es
+                  key: password
+            - name: DATASTORE_URI
+              value: "https://{{ include "developerportal.elasticservice" . }}:9200"
+            - name: DATASTORE_TRUSTSTORE_FILEPATH
+              value: {{ .Values.devportal.tls.elastic.truststorePath | quote }}
+            - name: DATASTORE_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.devportal.tls.elastic.truststorePasswordSecret }}
+                  key: {{ .Values.devportal.tls.elastic.truststorePasswordKey }}
+            {{- end }}
             {{- if .Values.extraEnvs }}
             {{- toYaml .Values.extraEnvs | nindent 12 }}
             {{- end }}
+          {{- if .Values.devportal.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.devportal.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.devportal.startupProbe }}
+          startupProbe:
+            {{- toYaml .Values.devportal.startupProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.devportal.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.devportal.readinessProbe | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.devportal.tls.elastic.enabled .Values.devportal.tls.apigw.enabled .Values.devportal.tls.ui.enabled .Values.extraVolumeMounts }}
+          volumeMounts:
+            {{- if .Values.devportal.tls.elastic.enabled }}
+            - name: es-truststore
+              mountPath: /certs/es
+              readOnly: true
+            {{- end }}
+            {{- if .Values.devportal.tls.apigw.enabled }}
+            - name: apigw-truststore
+              mountPath: /certs/apigw
+              readOnly: true
+            {{- end }}
+            {{- if .Values.devportal.tls.ui.enabled }}
+            - name: ui-keystore
+              mountPath: /certs/ui
+              readOnly: true
+            {{- end }}
+            {{- if or .Values.devportal.tls.elastic.enabled .Values.devportal.tls.apigw.enabled .Values.devportal.tls.ui.enabled }}
+            - name: wrapper-generated
+              mountPath: /opt/softwareag/DeveloperPortal/configuration/wrapper.conf
+              subPath: wrapper.conf
+              readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+      {{- if or .Values.devportal.tls.elastic.enabled .Values.devportal.tls.apigw.enabled .Values.devportal.tls.ui.enabled .Values.extraInitContainers }}
+      initContainers:
+        {{- if or .Values.devportal.tls.elastic.enabled .Values.devportal.tls.apigw.enabled .Values.devportal.tls.ui.enabled }}
+        - name: generate-wrapper-config
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command:
+            - sh
+            - -c
+            - |
+              cp /opt/softwareag/DeveloperPortal/configuration/wrapper.conf /config/wrapper.conf
+              {{- if .Values.devportal.tls.elastic.enabled }}
+              cat >> /config/wrapper.conf <<EOF
+              wrapper.java.additional.2700=-Dportal.datastore.username=${DATASTORE_USERNAME}
+              wrapper.java.additional.2701=-Dportal.datastore.password=${DATASTORE_PASSWORD}
+              wrapper.java.additional.2702=-Dportal.datastore.uris=https://{{ include "developerportal.elasticservice" . }}:9200
+              wrapper.java.additional.2710=-Dportal.datastore.ssl.truststore.filepath={{ .Values.devportal.tls.elastic.truststorePath }}
+              wrapper.java.additional.2711=-Dportal.datastore.ssl.truststore.password=${ES_TRUSTSTORE_PASSWORD}
+              EOF
+              {{- end }}
+              {{- if .Values.devportal.tls.apigw.enabled }}
+              cat >> /config/wrapper.conf <<EOF
+              wrapper.java.additional.2203=-Djavax.net.ssl.apigateway.trustStore={{ .Values.devportal.tls.apigw.truststorePath }}
+              wrapper.java.additional.2204=-Djavax.net.ssl.apigateway.trustStorePassword=${APIGW_TRUSTSTORE_PASSWORD}
+              EOF
+              {{- end }}
+              {{- if .Values.devportal.tls.ui.enabled }}
+              cat >> /config/wrapper.conf <<EOF
+              wrapper.java.additional.2013=-Dserver.ssl.enabled=true
+              wrapper.java.additional.2009=-Dserver.ssl.key-store={{ .Values.devportal.tls.ui.keystorePath }}
+              wrapper.java.additional.2010=-Dserver.ssl.key-alias={{ .Values.devportal.tls.ui.keyAlias }}
+              wrapper.java.additional.2011=-Dserver.ssl.key-password=${UI_KEY_PASSWORD}
+              wrapper.java.additional.2012=-Dserver.ssl.key-store-password=${UI_KEYSTORE_PASSWORD}
+              EOF
+              {{- end }}
+          env:
+            {{- if .Values.devportal.tls.elastic.enabled }}
+            - name: DATASTORE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "developerportal.elasticsecret" . }}-es
+                  key: username
+            - name: DATASTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "developerportal.elasticsecret" . }}-es
+                  key: password
+            - name: ES_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.devportal.tls.elastic.truststorePasswordSecret }}
+                  key: {{ .Values.devportal.tls.elastic.truststorePasswordKey }}
+            {{- end }}
+            {{- if .Values.devportal.tls.apigw.enabled }}
+            - name: APIGW_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.devportal.tls.apigw.truststorePasswordSecret }}
+                  key: {{ .Values.devportal.tls.apigw.truststorePasswordKey }}
+            {{- end }}
+            {{- if .Values.devportal.tls.ui.enabled }}
+            - name: UI_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.devportal.tls.ui.keystorePasswordSecret }}
+                  key: {{ .Values.devportal.tls.ui.keystorePasswordKey }}
+            - name: UI_KEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.devportal.tls.ui.keyPasswordSecret }}{{ .Values.devportal.tls.ui.keyPasswordSecret }}{{ else }}{{ .Values.devportal.tls.ui.keystorePasswordSecret }}{{ end }}
+                  key: {{ if .Values.devportal.tls.ui.keyPasswordSecret }}{{ .Values.devportal.tls.ui.keyPasswordKey }}{{ else }}{{ .Values.devportal.tls.ui.keystorePasswordKey }}{{ end }}
+            {{- end }}
+          volumeMounts:
+            - name: wrapper-generated
+              mountPath: /config
+        {{- end }}
+        {{- if .Values.extraInitContainers }}
+        {{- toYaml .Values.extraInitContainers | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.devportal.tls.elastic.enabled .Values.devportal.tls.apigw.enabled .Values.devportal.tls.ui.enabled .Values.extraVolumes }}
+      volumes:
+        {{- if .Values.devportal.tls.elastic.enabled }}
+        - name: es-truststore
+          secret:
+            secretName: {{ .Values.devportal.tls.elastic.truststoreSecret }}
+            items:
+              - key: truststore.jks
+                path: truststore.jks
+        {{- end }}
+        {{- if .Values.devportal.tls.apigw.enabled }}
+        - name: apigw-truststore
+          secret:
+            secretName: {{ .Values.devportal.tls.apigw.truststoreSecret }}
+            items:
+              - key: truststore.jks
+                path: truststore.jks
+        {{- end }}
+        {{- if .Values.devportal.tls.ui.enabled }}
+        - name: ui-keystore
+          secret:
+            secretName: {{ .Values.devportal.tls.ui.keystoreSecret }}
+            items:
+              - key: keystore.jks
+                path: keystore.jks
+        {{- end }}
+        {{- if or .Values.devportal.tls.elastic.enabled .Values.devportal.tls.apigw.enabled .Values.devportal.tls.ui.enabled }}
+        - name: wrapper-generated
+          emptyDir: {}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

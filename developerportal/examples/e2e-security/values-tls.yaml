@@ -1,0 +1,149 @@
+# Example values file for Developer Portal with end-to-end TLS security
+#
+# This file demonstrates how to deploy Developer Portal with TLS-enabled
+# Elasticsearch using cert-manager generated certificates.
+#
+# Prerequisites:
+# 1. Apply secrets.yaml
+# 2. Apply certificates.yaml
+# 3. Wait for certificates to be ready
+#
+# Usage:
+# helm install devportal ../../helm -f values-tls.yaml
+# helm upgrade devportal ../../helm -f values-tls.yaml
+
+# ==============================================================================
+# Image Configuration
+# ==============================================================================
+
+image:
+  repository: ibmwebmethods.azurecr.io/devportal
+  tag: "11.1.0.9"
+  pullPolicy: IfNotPresent
+
+# ==============================================================================
+# Elasticsearch Configuration with TLS
+# ==============================================================================
+
+elasticsearch:
+  # Deploy Elasticsearch using ECK operator
+  deploy: true
+
+  # Elasticsearch version (should match cert-manager certificate)
+  version: 8.12.2
+
+  # Enable TLS for Elasticsearch HTTP endpoint
+  tlsEnabled: true
+
+  # Certificate secret created by cert-manager
+  # This secret contains: tls.crt, tls.key, ca.crt, keystore.jks, truststore.jks
+  certificateSecretName: "devportal-developerportal-es-tls-secret"
+
+  defaultNodeSet:
+    count: 1
+    memoryMapping: false
+    setMaxMapCount: true
+    installPlugins:
+      - mapper-size
+
+# ==============================================================================
+# Developer Portal Configuration
+# ==============================================================================
+
+devportal:
+  # Port configuration (use 8080 for version 11.x, 8083 for 10.15)
+  port: 8080
+
+  # TLS Configuration
+  tls:
+    # Elasticsearch TLS connectivity
+    elastic:
+      # Enable TLS for Elasticsearch
+      enabled: true
+
+      # Secret containing JKS truststore (created by cert-manager)
+      truststoreSecret: "devportal-developerportal-es-tls-secret"
+
+      # Secret containing truststore password
+      truststorePasswordSecret: "cert-secret"
+      truststorePasswordKey: "password"
+
+      # Path where truststore will be mounted
+      truststorePath: "/certs/es/truststore.jks"
+
+    # API Gateway TLS connectivity
+    apigw:
+      enabled: true
+      truststoreSecret: "apigw-tls-secret"
+      truststorePasswordSecret: "cert-secret"
+      truststorePasswordKey: "password"
+      truststorePath: "/certs/apigw/truststore.jks"
+
+    # UI Server HTTPS configuration
+    ui:
+      enabled: true
+      port: 8443
+      keystoreSecret: "devportal-developerportal-ui-tls-secret"
+      keystorePasswordSecret: "cert-secret"
+      keystorePasswordKey: "password"
+      keystorePath: "/certs/ui/keystore.jks"
+      keyAlias: "certificate"  # Default alias used by cert-manager
+
+# ==============================================================================
+# Prometheus Configuration
+# ==============================================================================
+# Prometheus scrapes from inside the cluster, use HTTP for simplicity
+# (avoids certificate validation issues)
+
+prometheus:
+  path: "/portal/rest/v1/prometheus"
+  port: "8080"  # Use HTTP port for internal scraping
+  scheme: "http"
+  scrape: "true"
+
+# ==============================================================================
+# Resource Configuration (adjust based on your cluster)
+# ==============================================================================
+
+resources:
+  devportalContainer:
+    requests:
+      cpu: 1
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 4Gi
+
+# ==============================================================================
+# Ingress Configuration (optional)
+# ==============================================================================
+
+ingress:
+  enabled: true
+  className: "nginx"
+  defaultHostname: devportal.sttlab.local
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/app-root: /portal
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"  # Backend uses HTTPS
+    nginx.ingress.kubernetes.io/proxy-ssl-verify: "on"  # Verify backend certificate
+    nginx.ingress.kubernetes.io/proxy-ssl-secret: "devportal/iwhi-root-ca-secret"  # CA to trust
+    nginx.ingress.kubernetes.io/proxy-ssl-name: "devportal-developerportal.devportal.svc.cluster.local"  # Expected hostname
+  hosts:
+    - host: devportal.sttlab.local
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 443  # Connect to backend service HTTPS port
+  tls:
+    - secretName: tls-cert
+      hosts:
+        - devportal.sttlab.local
+
+# ==============================================================================
+# Prometheus Elasticsearch Exporter Configuration
+# ==============================================================================
+
+prometheus-elasticsearch-exporter:
+  serviceMonitor:
+    enabled: false

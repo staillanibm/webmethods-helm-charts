@@ -1,0 +1,146 @@
+# ==============================================================================
+# STEP 1: Create Self-Signed Root CA Issuer
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+
+---
+# ==============================================================================
+# STEP 2: Create CA Certificate (IWHI Root CA)
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: iwhi-root-ca
+spec:
+  isCA: true
+  commonName: IWHI Root CA
+  secretName: iwhi-root-ca-secret
+  duration: 87600h
+  renewBefore: 720h
+  subject:
+    organizations:
+      - IWHI
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+
+---
+# ==============================================================================
+# STEP 3: Create CA Issuer
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: iwhi-ca-issuer
+spec:
+  ca:
+    secretName: iwhi-root-ca-secret
+
+---
+# ==============================================================================
+# STEP 4: Elasticsearch Certificate with Keystores
+# ==============================================================================
+# This single certificate generates all required files:
+# - Elasticsearch: tls.crt, tls.key, ca.crt
+# - Developer Portal: truststore.jks (keystore.jks also created but unused)
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: elasticsearch-tls
+spec:
+  secretName: devportal-developerportal-es-tls-secret
+  commonName: devportal-developerportal-es-http
+  duration: 87600h
+  renewBefore: 720h
+  subject:
+    organizations:
+      - IWHI
+  dnsNames:
+    - devportal-developerportal-es-http
+    - devportal-developerportal-es-http.devportal
+    - devportal-developerportal-es-http.devportal.svc
+    - devportal-developerportal-es-http.devportal.svc.cluster.local
+    - "*.es.devportal.svc.cluster.local"
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth
+  issuerRef:
+    name: iwhi-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  keystores:
+    jks:
+      create: true
+      passwordSecretRef:
+        name: cert-secret
+        key: password
+    pkcs12:
+      create: true
+      passwordSecretRef:
+        name: cert-secret
+        key: password
+
+---
+# ==============================================================================
+# Developer Portal UI Server Certificate
+# ==============================================================================
+# This certificate secures the Developer Portal UI HTTPS endpoint
+# The JKS keystore is mounted by the Developer Portal pod for HTTPS server
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: devportal-ui-tls
+spec:
+  secretName: devportal-developerportal-ui-tls-secret
+  commonName: devportal-developerportal-ui
+  duration: 87600h
+  renewBefore: 720h
+  subject:
+    organizations:
+      - IWHI
+  dnsNames:
+    - devportal-developerportal
+    - devportal-developerportal.devportal
+    - devportal-developerportal.devportal.svc
+    - devportal-developerportal.devportal.svc.cluster.local
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+  issuerRef:
+    name: iwhi-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  keystores:
+    jks:
+      create: true
+      passwordSecretRef:
+        name: cert-secret
+        key: password
