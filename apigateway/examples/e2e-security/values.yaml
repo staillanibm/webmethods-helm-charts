@@ -50,7 +50,10 @@ ingresses:
     svcPort: "adminhttpsport"
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-      nginx.ingress.kubernetes.io/proxy-ssl-verify: "off"
+      nginx.ingress.kubernetes.io/proxy-ssl-verify: "on"
+      nginx.ingress.kubernetes.io/proxy-ssl-name: "gw-apigateway-admin"
+      nginx.ingress.kubernetes.io/proxy-ssl-secret: "apigateway/iwhi-root-ca-secret"
+      nginx.ingress.kubernetes.io/proxy-ssl-server-name: "on"
       nginx.ingress.kubernetes.io/affinity: "cookie"
       nginx.ingress.kubernetes.io/proxy-body-size: 10m
       nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
@@ -222,4 +225,492 @@ kibana:
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 3
+
+# Post-initialization configuration
+# ConfigMaps for post-init scripts
+postInitConfigMaps:
+  - name: post-init-scripts
+    annotations:
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "-5"
+    data:
+      upsert-store.sh: |
+        #!/bin/sh
+        set -e
+
+        STORE_TYPE="${1}"
+        STORE_NAME="${2}"
+        STORE_FILE="${3}"
+        STORE_PASSWORD="${4}"
+        FILE_TYPE="${5:-JKS}"
+        KEY_ALIAS="${6:-}"
+        KEY_PASSWORD="${7:-}"
+
+        APIGW_HOST="${APIGW_HOST:-localhost:5555}"
+        APIGW_USER="${APIGW_USER:-Administrator}"
+        APIGW_PASSWORD="${APIGW_PASSWORD:-manage}"
+
+        if [ $# -lt 4 ]; then
+            echo "Usage: $0 <keystore|truststore> <name> <file> <password> [JKS|PKCS12] [key-alias] [key-password]"
+            exit 1
+        fi
+
+        if [ "$STORE_TYPE" != "keystore" ] && [ "$STORE_TYPE" != "truststore" ]; then
+            echo "Error: First argument must be 'keystore' or 'truststore'"
+            exit 1
+        fi
+
+        if [ ! -f "$STORE_FILE" ]; then
+            echo "Error: File not found: $STORE_FILE"
+            exit 1
+        fi
+
+        # Check if store exists
+        EXISTS=$(curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+            "http://${APIGW_HOST}/rest/apigateway/is/${STORE_TYPE}/${STORE_NAME}" \
+            -w "%{http_code}" -o /dev/null)
+
+        if [ "$EXISTS" = "200" ]; then
+            echo "Updating existing ${STORE_TYPE}: ${STORE_NAME}"
+            URL="http://${APIGW_HOST}/rest/apigateway/is/${STORE_TYPE}/${STORE_NAME}"
+        else
+            echo "Creating new ${STORE_TYPE}: ${STORE_NAME}"
+            URL="http://${APIGW_HOST}/rest/apigateway/is/${STORE_TYPE}"
+        fi
+
+        # Build form data for upload
+        CURL_ARGS="-F keyStoreName=${STORE_NAME} -F keyStoreType=${FILE_TYPE} -F keyStorePassword=${STORE_PASSWORD} -F uploadFileName=${STORE_NAME}.jks -F fileContent=@${STORE_FILE}"
+
+        # Add key alias and password if provided (for keystores)
+        if [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            CURL_ARGS="$CURL_ARGS -F pkAliasesList=${KEY_ALIAS} -F pkPasswordsList=${KEY_PASSWORD}"
+        fi
+
+        # Upload store
+        RESPONSE=$(curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+            -X POST \
+            "${URL}" \
+            $CURL_ARGS)
+
+        if echo "$RESPONSE" | grep -q "keyStoreName"; then
+            echo "Successfully configured ${STORE_TYPE}: ${STORE_NAME}"
+        else
+            echo "Error configuring ${STORE_TYPE}"
+            echo "$RESPONSE"
+            exit 1
+        fi
+
+      wait-for-gateway.sh: |
+        #!/bin/sh
+        set -e
+
+        APIGW_HOST="${APIGW_HOST:-localhost:5555}"
+        APIGW_USER="${APIGW_USER:-Administrator}"
+        APIGW_PASSWORD="${APIGW_PASSWORD:-manage}"
+        MAX_ATTEMPTS="${MAX_ATTEMPTS:-60}"
+
+        echo "Waiting for API Gateway to be ready..."
+        attempt=0
+
+        while [ $attempt -lt $MAX_ATTEMPTS ]; do
+          if curl -s -f -u "${APIGW_USER}:${APIGW_PASSWORD}" "http://${APIGW_HOST}/rest/apigateway/health" > /dev/null 2>&1; then
+            echo "API Gateway is ready"
+            exit 0
+          fi
+          attempt=$((attempt + 1))
+          echo "API Gateway not ready, waiting... (${attempt}/${MAX_ATTEMPTS})"
+          sleep 10
+        done
+
+        echo "API Gateway did not become ready in time"
+        exit 1
+
+      configure-https-port.sh: |
+        #!/bin/sh
+        set -e
+
+        # Install jq if not available
+        if ! command -v jq >/dev/null 2>&1; then
+            echo "Installing jq..."
+            apk add --no-cache jq >/dev/null 2>&1
+        fi
+
+        PORT_NUMBER="${1}"
+        PORT_ALIAS="${2}"
+        KEYSTORE_NAME="${3}"
+        KEY_ALIAS="${4:-}"
+
+        APIGW_HOST="${APIGW_HOST:-localhost:5555}"
+        APIGW_USER="${APIGW_USER:-Administrator}"
+        APIGW_PASSWORD="${APIGW_PASSWORD:-manage}"
+
+        if [ $# -lt 3 ]; then
+            echo "Usage: $0 <port-number> <port-alias> <keystore-name> [key-alias]"
+            exit 1
+        fi
+
+        echo "Configuring HTTPS port ${PORT_NUMBER} (${PORT_ALIAS}) with keystore ${KEYSTORE_NAME}"
+
+        # Check if port exists
+        PORT_EXISTS=$(curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+            -H "Accept: application/json" \
+            "http://${APIGW_HOST}/rest/apigateway/ports" \
+            | jq -r ".listeners[] | select(.port == ${PORT_NUMBER}) | .port" || echo "")
+
+        if [ -n "$PORT_EXISTS" ]; then
+            echo "Port ${PORT_NUMBER} already exists, skipping creation"
+            exit 0
+        fi
+
+        # Create HTTPS port - use alias field for key alias, keyStore field for keystore name
+        if [ -n "${KEY_ALIAS}" ]; then
+            PORT_JSON=$(jq -n \
+                --arg listenerKey "HTTPSListener@${PORT_NUMBER}" \
+                --arg pkg "WmRoot" \
+                --arg protocol "HTTPS" \
+                --argjson port ${PORT_NUMBER} \
+                --arg bind "0.0.0.0" \
+                --arg portAlias "${PORT_ALIAS}" \
+                --arg portDescription "HTTPS port ${PORT_NUMBER} using ${KEYSTORE_NAME}" \
+                --arg factoryKey "webMethods/HTTP" \
+                --arg ssl "true" \
+                --arg keyStore "${KEYSTORE_NAME}" \
+                --arg alias "${KEY_ALIAS}" \
+                --arg trustStore "DEFAULT_IS_TRUSTSTORE" \
+                --arg clientAuth "none" \
+                --arg enabled "true" \
+                --arg listenerType "Regular" \
+                --arg accessMode "allow" \
+                --arg provider "webMethods" \
+                '{$listenerKey, $pkg, $protocol, $port, $bind, $portAlias, $portDescription, $factoryKey, $ssl, $keyStore, $alias, $trustStore, $clientAuth, $enabled, $listenerType, $accessMode, $provider}')
+        else
+            PORT_JSON=$(jq -n \
+                --arg listenerKey "HTTPSListener@${PORT_NUMBER}" \
+                --arg pkg "WmRoot" \
+                --arg protocol "HTTPS" \
+                --argjson port ${PORT_NUMBER} \
+                --arg bind "0.0.0.0" \
+                --arg portAlias "${PORT_ALIAS}" \
+                --arg portDescription "HTTPS port ${PORT_NUMBER} using ${KEYSTORE_NAME}" \
+                --arg factoryKey "webMethods/HTTP" \
+                --arg ssl "true" \
+                --arg keyStore "${KEYSTORE_NAME}" \
+                --arg trustStore "DEFAULT_IS_TRUSTSTORE" \
+                --arg clientAuth "none" \
+                --arg enabled "true" \
+                --arg listenerType "Regular" \
+                --arg accessMode "allow" \
+                --arg provider "webMethods" \
+                '{$listenerKey, $pkg, $protocol, $port, $bind, $portAlias, $portDescription, $factoryKey, $ssl, $keyStore, $trustStore, $clientAuth, $enabled, $listenerType, $accessMode, $provider}')
+        fi
+
+        RESPONSE=$(curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+            -X POST \
+            "http://${APIGW_HOST}/rest/apigateway/ports" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d "${PORT_JSON}")
+
+        if echo "$RESPONSE" | jq -e '.status == "success"' >/dev/null 2>&1; then
+            echo "Successfully created HTTPS port ${PORT_NUMBER}"
+
+            # Enable the port
+            echo "Enabling port ${PORT_NUMBER}..."
+            ENABLE_JSON=$(jq -n \
+                --arg listenerKey "HTTPSListener@${PORT_NUMBER}" \
+                --arg pkg "WmRoot" \
+                '{$listenerKey, $pkg}')
+
+            ENABLE_RESPONSE=$(curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+                -X PUT \
+                "http://${APIGW_HOST}/rest/apigateway/ports/enable" \
+                -H "Accept: application/json" \
+                -H "Content-Type: application/json" \
+                -d "${ENABLE_JSON}")
+
+            if echo "$ENABLE_RESPONSE" | jq -e '.message' | grep -q "enabled"; then
+                echo "Successfully enabled HTTPS port ${PORT_NUMBER}"
+            else
+                echo "Warning: Port created but failed to enable"
+                echo "$ENABLE_RESPONSE" | jq '.' 2>/dev/null || echo "$ENABLE_RESPONSE"
+            fi
+        else
+            echo "Failed to configure port ${PORT_NUMBER}"
+            echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
+            exit 1
+        fi
+
+      update-port.sh: |
+        #!/bin/sh
+        set -e
+
+        # Install jq if not available
+        if ! command -v jq >/dev/null 2>&1; then
+            echo "Installing jq..."
+            apk add --no-cache jq >/dev/null 2>&1
+        fi
+
+        PORT_NUMBER="${1}"
+        KEYSTORE_NAME="${2}"
+        KEY_ALIAS="${3:-}"
+
+        APIGW_HOST="${APIGW_HOST:-localhost:5555}"
+        APIGW_USER="${APIGW_USER:-Administrator}"
+        APIGW_PASSWORD="${APIGW_PASSWORD:-manage}"
+
+        if [ $# -lt 2 ]; then
+            echo "Usage: $0 <port-number> <keystore-name> [key-alias]"
+            exit 1
+        fi
+
+        echo "Updating HTTPS port ${PORT_NUMBER} to use keystore ${KEYSTORE_NAME}"
+
+        # Get current port configuration
+        PORT_CONFIG=$(curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+            -H "Accept: application/json" \
+            "http://${APIGW_HOST}/rest/apigateway/ports" \
+            | jq ".listeners[] | select(.port == ${PORT_NUMBER})")
+
+        if [ -z "$PORT_CONFIG" ]; then
+            echo "Error: Port ${PORT_NUMBER} does not exist"
+            exit 1
+        fi
+
+        LISTENER_KEY=$(echo "$PORT_CONFIG" | jq -r '.listenerKey')
+        PORT_ENABLED=$(echo "$PORT_CONFIG" | jq -r '.enabled')
+
+        # Disable the port if it's enabled
+        if [ "$PORT_ENABLED" = "true" ]; then
+            echo "Disabling port ${PORT_NUMBER}..."
+            DISABLE_JSON=$(jq -n \
+                --arg listenerKey "${LISTENER_KEY}" \
+                --arg pkg "WmRoot" \
+                '{$listenerKey, $pkg}')
+
+            curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+                -X PUT \
+                "http://${APIGW_HOST}/rest/apigateway/ports/disable" \
+                -H "Content-Type: application/json" \
+                -H "Accept: application/json" \
+                -d "${DISABLE_JSON}" > /dev/null
+        fi
+
+        # Extract current pkg for oldPkg field (required for update)
+        OLD_PKG=$(echo "$PORT_CONFIG" | jq -r '.pkg')
+
+        # Extract current configuration and update keyStore
+        if [ -n "${KEY_ALIAS}" ]; then
+            UPDATED_CONFIG=$(echo "$PORT_CONFIG" | jq \
+                --arg keyStore "${KEYSTORE_NAME}" \
+                --arg alias "${KEY_ALIAS}" \
+                --arg trustStore "DEFAULT_IS_TRUSTSTORE" \
+                --arg clientAuth "none" \
+                --arg oldPkg "${OLD_PKG}" \
+                '. + {keyStore: $keyStore, alias: $alias, trustStore: $trustStore, clientAuth: $clientAuth, oldPkg: $oldPkg}')
+        else
+            UPDATED_CONFIG=$(echo "$PORT_CONFIG" | jq \
+                --arg keyStore "${KEYSTORE_NAME}" \
+                --arg trustStore "DEFAULT_IS_TRUSTSTORE" \
+                --arg clientAuth "none" \
+                --arg oldPkg "${OLD_PKG}" \
+                '. + {keyStore: $keyStore, trustStore: $trustStore, clientAuth: $clientAuth, oldPkg: $oldPkg}')
+        fi
+
+        # Update the port
+        echo "Updating port configuration..."
+        RESPONSE=$(curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+            -X PUT \
+            "http://${APIGW_HOST}/rest/apigateway/ports" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d "${UPDATED_CONFIG}")
+
+        # Check if the response contains the updated port configuration
+        UPDATED_KEYSTORE=$(echo "$RESPONSE" | jq -r '.keyStore' 2>/dev/null)
+        if [ "$UPDATED_KEYSTORE" = "${KEYSTORE_NAME}" ]; then
+            echo "Successfully updated port configuration"
+
+            # Re-enable the port if it was enabled before
+            if [ "$PORT_ENABLED" = "true" ]; then
+                echo "Re-enabling port ${PORT_NUMBER}..."
+                ENABLE_JSON=$(jq -n \
+                    --arg listenerKey "${LISTENER_KEY}" \
+                    --arg pkg "WmRoot" \
+                    '{$listenerKey, $pkg}')
+
+                ENABLE_RESPONSE=$(curl -s -u "${APIGW_USER}:${APIGW_PASSWORD}" \
+                    -X PUT \
+                    "http://${APIGW_HOST}/rest/apigateway/ports/enable" \
+                    -H "Content-Type: application/json" \
+                    -H "Accept: application/json" \
+                    -d "${ENABLE_JSON}")
+
+                if echo "$ENABLE_RESPONSE" | jq -e '.message' | grep -q "enabled"; then
+                    echo "Successfully updated HTTPS port ${PORT_NUMBER} to use ${KEYSTORE_NAME}"
+                else
+                    echo "Warning: Port updated but failed to re-enable"
+                    echo "$ENABLE_RESPONSE" | jq '.' 2>/dev/null || echo "$ENABLE_RESPONSE"
+                fi
+            else
+                echo "Successfully updated HTTPS port ${PORT_NUMBER} to use ${KEYSTORE_NAME}"
+            fi
+        else
+            echo "Failed to update port ${PORT_NUMBER}"
+            echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
+            exit 1
+        fi
+
+# Post-initialization jobs
+postInitJobs:
+  - name: configure-keystores
+    annotations:
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "0"
+      "helm.sh/hook-delete-policy": before-hook-creation
+    image:
+      repository: alpine/curl
+      tag: latest
+      imagePullPolicy: IfNotPresent
+    restartPolicy: OnFailure
+    command:
+      - /bin/sh
+      - -c
+      - |
+        # Wait for API Gateway
+        /scripts/wait-for-gateway.sh
+
+        # Configure RT_KEYSTORE with key alias password
+        echo "=== Configuring RT_KEYSTORE ==="
+        /scripts/upsert-store.sh keystore RT_KEYSTORE /certs/rt/keystore.jks "${RT_KEYSTORE_PASSWORD}" JKS rt-key "${RT_KEYSTORE_PASSWORD}"
+
+        # Create ADMIN_KEYSTORE with key alias password
+        echo "=== Creating ADMIN_KEYSTORE ==="
+        /scripts/upsert-store.sh keystore ADMIN_KEYSTORE /certs/admin/keystore.jks "${ADMIN_KEYSTORE_PASSWORD}" JKS admin-key "${ADMIN_KEYSTORE_PASSWORD}"
+
+        echo "=== Keystore configuration complete ==="
+    env:
+      - name: APIGW_HOST
+        value: "gw-apigateway-admin:5555"
+      - name: APIGW_USER
+        value: "Administrator"
+      - name: APIGW_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: gw-apigateway-admin-password
+            key: password
+      - name: RT_KEYSTORE_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: gw-apigateway-rt-keystore-secret
+            key: password
+      - name: ADMIN_KEYSTORE_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: gw-apigateway-admin-keystore-secret
+            key: password
+    volumeMounts:
+      - name: rt-keystore
+        mountPath: /certs/rt
+        readOnly: true
+      - name: admin-keystore
+        mountPath: /certs/admin
+        readOnly: true
+      - name: scripts
+        mountPath: /scripts
+        readOnly: true
+    volumes:
+      - name: rt-keystore
+        secret:
+          secretName: gw-apigateway-rt-tls-secret
+          items:
+            - key: keystore.jks
+              path: keystore.jks
+      - name: admin-keystore
+        secret:
+          secretName: gw-apigateway-admin-tls-secret
+          items:
+            - key: keystore.jks
+              path: keystore.jks
+      - name: scripts
+        configMap:
+          name: post-init-scripts
+          defaultMode: 0755
+
+  - name: configure-https-port
+    annotations:
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "1"
+      "helm.sh/hook-delete-policy": before-hook-creation
+    image:
+      repository: alpine/curl
+      tag: latest
+      imagePullPolicy: IfNotPresent
+    restartPolicy: OnFailure
+    command:
+      - /bin/sh
+      - -c
+      - |
+        # Configure HTTPS port 5556 with RT_KEYSTORE
+        echo "=== Configuring HTTPS port 5556 ==="
+        /scripts/configure-https-port.sh 5556 "Runtime-HTTPS" RT_KEYSTORE rt-key
+
+        echo "=== Port configuration complete ==="
+    env:
+      - name: APIGW_HOST
+        value: "gw-apigateway-admin:5555"
+      - name: APIGW_USER
+        value: "Administrator"
+      - name: APIGW_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: gw-apigateway-admin-password
+            key: password
+    volumeMounts:
+      - name: scripts
+        mountPath: /scripts
+        readOnly: true
+    volumes:
+      - name: scripts
+        configMap:
+          name: post-init-scripts
+          defaultMode: 0755
+
+  - name: update-admin-port
+    annotations:
+      "helm.sh/hook": post-install,post-upgrade
+      "helm.sh/hook-weight": "2"
+      "helm.sh/hook-delete-policy": before-hook-creation
+    image:
+      repository: alpine/curl
+      tag: latest
+      imagePullPolicy: IfNotPresent
+    restartPolicy: OnFailure
+    command:
+      - /bin/sh
+      - -c
+      - |
+        # Update HTTPS port 5543 to use ADMIN_KEYSTORE with admin-key alias
+        echo "=== Updating HTTPS port 5543 to use ADMIN_KEYSTORE ==="
+        /scripts/update-port.sh 5543 ADMIN_KEYSTORE admin-key
+
+        echo "=== Admin port update complete ==="
+    env:
+      - name: APIGW_HOST
+        value: "gw-apigateway-admin:5555"
+      - name: APIGW_USER
+        value: "Administrator"
+      - name: APIGW_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: gw-apigateway-admin-password
+            key: password
+    volumeMounts:
+      - name: scripts
+        mountPath: /scripts
+        readOnly: true
+    volumes:
+      - name: scripts
+        configMap:
+          name: post-init-scripts
+          defaultMode: 0755
 

@@ -9,9 +9,11 @@ This configuration provides end-to-end TLS security with:
 - **Kibana**: HTTPS-only communication (port 5601)
 - **API Gateway**: Secure connections to both Elasticsearch and Kibana using truststores
 - **API Gateway UI**: HTTPS endpoint with custom certificate (port 9073)
-- **API Gateway Admin**: HTTPS endpoint with default Integration Server certificate (port 5543)
-- **Ingress**: TLS termination with backend HTTPS verification
+- **API Gateway Runtime**: HTTPS endpoint with custom certificate (port 5556)
+- **API Gateway Admin**: HTTPS endpoint with custom certificate (port 5543)
+- **Ingress**: TLS termination with backend HTTPS verification enabled
 - **Certificate Management**: Automated certificate issuance and renewal via cert-manager
+- **Post-Init Automation**: Automatic keystore and port configuration via Kubernetes Jobs
 
 ## Prerequisites
 
@@ -52,6 +54,8 @@ Defines cert-manager resources:
 - **Elasticsearch Certificate**: Generates JKS keystore and truststore for Elasticsearch HTTPS (port 9200)
 - **Kibana Certificate**: Generates PKCS12 keystore for Kibana HTTPS server (port 5601)
 - **UI Certificate**: Generates JKS keystore for API Gateway UI HTTPS endpoint (port 9073)
+- **Runtime Certificate**: Generates JKS keystore with alias `rt-key` for API Gateway Runtime HTTPS port (5556)
+- **Admin Certificate**: Generates JKS keystore with alias `admin-key` for API Gateway Admin HTTPS port (5543)
 
 ### 2. secrets.yaml
 Contains:
@@ -59,6 +63,8 @@ Contains:
 - **gw-apigateway-es-keystore-secret**: Elasticsearch keystore password
 - **gw-apigateway-es-truststore-secret**: Elasticsearch truststore password
 - **gw-apigateway-ui-keystore-secret**: API Gateway UI keystore password
+- **gw-apigateway-rt-keystore-secret**: API Gateway Runtime keystore password
+- **gw-apigateway-admin-keystore-secret**: API Gateway Admin keystore password
 
 ### 3. values.yaml
 Helm values file configuring:
@@ -67,12 +73,17 @@ Helm values file configuring:
 - **API Gateway**:
   - Secure connections to Elasticsearch and Kibana using mounted truststores/keystores
   - UI HTTPS port (9073) with custom certificate via environment variables
-  - Admin HTTPS port (5543) using default Integration Server certificate
+  - Runtime HTTPS port (5556) configured via post-init job with RT_KEYSTORE
+  - Admin HTTPS port (5543) configured via post-init job with ADMIN_KEYSTORE
 - **Ingresses**:
   - UI ingress with backend HTTPS and SSL verification enabled
-  - Admin ingress with backend HTTPS (SSL verification disabled for default cert)
+  - Admin ingress with backend HTTPS and SSL verification enabled
   - RT ingress for API runtime traffic
 - **Volumes and Mounts**: Keystores and truststores mounted at appropriate paths
+- **Post-Init Jobs**: Automated configuration of keystores and HTTPS ports after deployment
+  - `configure-keystores`: Creates RT_KEYSTORE and ADMIN_KEYSTORE with key aliases
+  - `configure-https-port`: Creates and enables HTTPS port 5556 for runtime
+  - `update-admin-port`: Updates port 5543 to use ADMIN_KEYSTORE
 - **Environment Variables**: TLS configuration for Elasticsearch datastore and UI HTTPS
 
 ## Deployment
@@ -219,21 +230,43 @@ https://apigateway-ui.sttlab.local
 
 ### TLS Communication Flow
 
-1. **Ingress → Services**: TLS termination at ingress, backend HTTPS to services
+1. **Ingress → Services**: TLS termination at ingress, backend HTTPS to services with certificate verification
 2. **API Gateway → Elasticsearch**: HTTPS with certificate verification
 3. **API Gateway → Kibana**: HTTPS communication
-4. **API Gateway UI**: HTTPS on port 9073 with custom certificate
-5. **API Gateway Admin**: HTTPS on port 5543 with default Integration Server certificate
+4. **API Gateway UI**: HTTPS on port 9073 with custom certificate (UI_KEYSTORE)
+5. **API Gateway Runtime**: HTTPS on port 5556 with custom certificate (RT_KEYSTORE)
+6. **API Gateway Admin**: HTTPS on port 5543 with custom certificate (ADMIN_KEYSTORE)
 
 ### Port Summary
 
-| Component | HTTP Port | HTTPS Port | Certificate |
-|-----------|-----------|------------|-------------|
-| UI | 9072 | 9073 | Custom (cert-manager) |
-| Admin | 5555 | 5543 | Default IS |
-| Runtime | 5556 | - | - |
-| Elasticsearch | - | 9200 | Custom (cert-manager) |
-| Kibana | - | 5601 | Custom (cert-manager) |
+| Component | HTTP Port | HTTPS Port | Keystore | Key Alias | Certificate |
+|-----------|-----------|------------|----------|-----------|-------------|
+| UI | 9072 | 9073 | UI_KEYSTORE | - | Custom (cert-manager) |
+| Admin | 5555 | 5543 | ADMIN_KEYSTORE | admin-key | Custom (cert-manager) |
+| Runtime | - | 5556 | RT_KEYSTORE | rt-key | Custom (cert-manager) |
+| Elasticsearch | - | 9200 | - | - | Custom (cert-manager) |
+| Kibana | - | 5601 | - | - | Custom (cert-manager) |
+
+### Post-Init Jobs
+
+The deployment includes automated post-initialization jobs that configure keystores and HTTPS ports:
+
+1. **configure-keystores** (weight 0):
+   - Creates RT_KEYSTORE with `rt-key` alias for port 5556
+   - Creates ADMIN_KEYSTORE with `admin-key` alias for port 5543
+   - Uses keystores generated by cert-manager
+
+2. **configure-https-port** (weight 1):
+   - Creates HTTPS port 5556 for API runtime
+   - Configures with RT_KEYSTORE, rt-key alias, and DEFAULT_IS_TRUSTSTORE
+   - Automatically enables the port
+
+3. **update-admin-port** (weight 2):
+   - Updates existing port 5543 to use ADMIN_KEYSTORE
+   - Configures with admin-key alias and DEFAULT_IS_TRUSTSTORE
+   - Sets clientAuth to "none" for ingress compatibility
+
+These jobs run automatically during `helm install` and `helm upgrade`, ensuring consistent configuration across deployments.
 
 ## Cleanup
 

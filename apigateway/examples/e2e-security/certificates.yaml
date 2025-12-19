@@ -191,3 +191,95 @@ spec:
         name: cert-secret
         key: password
 
+---
+# ==============================================================================
+# STEP 7: API Gateway Runtime Certificate with JKS Keystore
+# ==============================================================================
+# Certificate for API Gateway Runtime (RT_KEYSTORE) - Port 5556
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: apigateway-rt-tls
+spec:
+  secretName: gw-apigateway-rt-tls-secret
+  commonName: gw-apigateway-rt
+  duration: 87600h
+  renewBefore: 720h
+  subject:
+    organizations:
+      - IWHI
+  dnsNames:
+    - gw-apigateway-rt
+    - gw-apigateway-rt.apigateway
+    - gw-apigateway-rt.apigateway.svc
+    - gw-apigateway-rt.apigateway.svc.cluster.local
+    - apigateway-rt.sttlab.local
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+  issuerRef:
+    name: iwhi-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  keystores:
+    jks:
+      create: true
+      alias: rt-key
+      passwordSecretRef:
+        name: gw-apigateway-rt-keystore-secret
+        key: password
+
+---
+# ==============================================================================
+# STEP 8: API Gateway Admin Certificate with JKS Keystore
+# ==============================================================================
+# Certificate for DEFAULT_IS_KEYSTORE - Port 5543
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: apigateway-admin-tls
+spec:
+  secretName: gw-apigateway-admin-tls-secret
+  commonName: gw-apigateway-admin
+  duration: 87600h
+  renewBefore: 720h
+  subject:
+    organizations:
+      - IWHI
+  dnsNames:
+    - gw-apigateway-admin
+    - gw-apigateway-admin.apigateway
+    - gw-apigateway-admin.apigateway.svc
+    - gw-apigateway-admin.apigateway.svc.cluster.local
+    - apigateway-admin.sttlab.local
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+  issuerRef:
+    name: iwhi-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  keystores:
+    jks:
+      create: true
+      alias: admin-key
+      passwordSecretRef:
+        name: gw-apigateway-admin-keystore-secret
+        key: password
+
