@@ -22,8 +22,8 @@ spec:
   isCA: true
   commonName: IWHI Root CA
   secretName: iwhi-root-ca-secret
-  duration: 87600h  
-  renewBefore: 720h  
+  duration: 87600h
+  renewBefore: 720h
   subject:
     organizations:
       - IWHI
@@ -145,3 +145,49 @@ spec:
       passwordSecretRef:
         name: cert-secret
         key: password
+
+---
+# ==============================================================================
+# STEP 6: API Gateway UI Certificate with JKS Keystore
+# ==============================================================================
+# Certificate for API Gateway UI HTTPS endpoint
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: apigateway-ui-tls
+spec:
+  secretName: gw-apigateway-ui-tls-secret
+  commonName: gw-apigateway-ui
+  duration: 87600h
+  renewBefore: 720h
+  subject:
+    organizations:
+      - IWHI
+  dnsNames:
+    - gw-apigateway-ui
+    - gw-apigateway-ui.apigateway
+    - gw-apigateway-ui.apigateway.svc
+    - gw-apigateway-ui.apigateway.svc.cluster.local
+    - apigateway-ui.sttlab.local
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+  issuerRef:
+    name: iwhi-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  keystores:
+    jks:
+      create: true
+      passwordSecretRef:
+        name: cert-secret
+        key: password
+

@@ -61,6 +61,15 @@ spec:
     {{- if (eq .Values.service.type "ClusterIP") }}
     nodePort: null
     {{- end }}
+  {{- if .Values.apigw.adminHttpsPort }}
+  - port: {{ int .Values.apigw.adminHttpsPort }}
+    protocol: TCP
+    targetPort: {{ int .Values.apigw.adminHttpsPort }}
+    name: adminhttpsport
+    {{- if (eq .Values.service.type "ClusterIP") }}
+    nodePort: null
+    {{- end }}
+  {{- end }}
   selector:
     {{- include "common.labels.matchLabels" . | nindent 4}}
 {{- end }}
@@ -89,6 +98,15 @@ spec:
     {{- if (eq .Values.service.type "ClusterIP") }}
     nodePort: null
     {{- end }}
+  {{- if .Values.apigw.uiHttpsPort }}
+  - port: {{ int .Values.apigw.uiHttpsPort }}
+    protocol: TCP
+    targetPort: {{ int .Values.apigw.uiHttpsPort }}
+    name: uihttpsport
+    {{- if (eq .Values.service.type "ClusterIP") }}
+    nodePort: null
+    {{- end }}
+  {{- end }}
   selector:
     {{- include "common.labels.matchLabels" . | nindent 4}}
 {{- if .Values.grpcService.enabled }}

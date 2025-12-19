@@ -166,11 +166,23 @@ In order to enable the external load balancer provide the following configuratio
 
 ## TLS for API Gateway
 
+### Ingress TLS
+
 If desired you may deploy API Gateway with your own TLS key and cert. The Template contains a TLS manifest which will look for the keys: ingress.tls.key and ingress.tls.cert. In your deployment environment you can redirect the output of a certificate and key file (e.g. using secure files from Azure) and directly deploy the TLS configuration for the API Gateway.
 
 ```bash
 helm upgrade -i -f myvalues.yaml --set ingress.tls.key="$(<key.pem)" --set ingress.tls.cert="$(<cert.pem)"
 ```
+
+### HTTPS Ports
+
+API Gateway supports HTTPS on multiple ports:
+
+- **UI HTTPS Port (9073)**: Configure with custom certificates using environment variables (`apigw_ui_https_*`)
+- **Admin HTTPS Port (5543)**: Uses the default Integration Server certificate automatically
+- **Runtime Port**: Can be configured with HTTPS as needed
+
+For a complete end-to-end TLS deployment example including cert-manager integration, Elasticsearch HTTPS, Kibana HTTPS, and backend HTTPS verification, see the [e2e-security](../examples/e2e-security/README.md) example.
 
 ## Examples for Use-cases
 
@@ -181,7 +193,7 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | [fluentd-sidecar](../examples/fluentd-sidecar/README.md) | Running API Gateway with Fluentd Sidecar |
 | [house-keeping-job](../examples/house-keeping-job/README.md) | Example to create house keeping job: purge transaction events  |
 | [custom-resource-objects](../examples/custom-resource-objects/README.md) | Example of deploying Custom Resource objects  |
-| [e2e-security](../examples/e2e-security/README.md) | End to end security deployment  |
+| [e2e-security](../examples/e2e-security/README.md) | End-to-end TLS security with cert-manager, HTTPS for all components (Elasticsearch, Kibana, API Gateway UI/Admin), backend HTTPS verification at ingress |
 
 ## Version History
 
@@ -284,6 +296,8 @@ kubectl delete deployment <Helm-release-name>-prometheus-elasticsearch-exporter 
 | apigw.serviceName | string | `"apigw"` |  |
 | apigw.startupProbe | object | `{"failureThreshold":12,"periodSeconds":30,"successThreshold":1,"tcpSocket":{"port":"admin-http"},"timeoutSeconds":1}` | startupProbe configuration for API Gateway container. Runs before the livenessProbe. It is used to determine if the container has finished starting. |
 | apigw.uiPort | int | `9072` | The default API Administration UI port |
+| apigw.uiHttpsPort | int | `9073` | The HTTPS port for API Gateway UI. Configure with custom certificates using environment variables (apigw_ui_https_*). See e2e-security example. |
+| apigw.adminHttpsPort | int | `5543` | The HTTPS port for API Gateway Admin. Uses the default Integration Server certificate. |
 | apigw.uiService | string | `"apigw-ui-svc"` |  |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.maxReplicas | int | `100` |  |
