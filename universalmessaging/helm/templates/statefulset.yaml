@@ -103,26 +103,26 @@ spec:
             - containerPort: 9200
               protocol: TCP              
           volumeMounts:
-          - name: data
-            mountPath: /opt/softwareag/UniversalMessaging/server/umserver/data
-          - name: logs
-            mountPath: /opt/softwareag/UniversalMessaging/server/umserver/logs
-          - name: configuration
-            mountPath: /opt/softwareag/common/conf
-          {{- if .Values.license }}
-          - name: licence-xml
-            mountPath: /opt/softwareag/UniversalMessaging/server/umserver/licence/licence.xml
-            subPath:   licence.xml
-            readOnly:  true
-          {{- end }}
-          - name: jmx-exporter-config
-            mountPath: /opt/softwareag/UniversalMessaging/server/umserver/bin/jmx_sag_um_exporter.yaml
-            subPath:   jmx_sag_um_exporter.yaml
-            readOnly:  true
-          - name: custom-server-common
-            mountPath: /opt/softwareag/UniversalMessaging/server/umserver/bin/Custom_Server_Common.conf
-            subPath:   Custom_Server_Common.conf
-            readOnly:  true
+            - name: data
+              mountPath: /opt/softwareag/UniversalMessaging/server/umserver/data
+            - name: logs
+              mountPath: /opt/softwareag/UniversalMessaging/server/umserver/logs
+            - name: configuration
+              mountPath: /opt/softwareag/common/conf
+            {{- if .Values.license }}
+            - name: licence-xml
+              mountPath: /opt/softwareag/UniversalMessaging/server/umserver/licence/licence.xml
+              subPath:   licence.xml
+              readOnly:  true
+            {{- end }}
+            - name: jmx-exporter-config
+              mountPath: /opt/softwareag/UniversalMessaging/server/umserver/bin/jmx_sag_um_exporter.yaml
+              subPath:   jmx_sag_um_exporter.yaml
+              readOnly:  true
+            - name: custom-server-common
+              mountPath: /opt/softwareag/UniversalMessaging/server/umserver/bin/Custom_Server_Common.conf
+              subPath:   Custom_Server_Common.conf
+              readOnly:  true
           {{- if .Values.extraVolumeMounts }}
           {{- if eq "string" (printf "%T" .Values.extraVolumeMounts) }}
             {{- tpl .Values.extraVolumeMounts . | nindent 12 }}              

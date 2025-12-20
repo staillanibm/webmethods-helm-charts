@@ -78,6 +78,34 @@ extraVolumeMounts: |
     subPath: truststore.jks
     readOnly: true
 
+# -- Extra config maps for additional configurations such as extra ports, etc.
+extraConfigMaps:
+  - metadata:
+      name: assets-conf
+    data:
+      connectionFactoryList.txt: |
+        # Add one connection factory name per line
+        # Example: myConnectionFactory
+      jmsChannelList.txt: |
+        # Add one JMS queue name per line
+        # Example: MyJMSQueue
+      jmsTopicList.txt: |
+        # Add one JMS topic name per line
+        # Example: MyJMSTopic
+      queueConnectionFactoryList.txt: |
+        # Add one queue connection factory name per line
+        # Example: myQueueConnectionFactory
+      topicConnectionFactoryList.txt: |
+        # Add one topic connection factory name per line
+        # Example: myTopicConnectionFactory
+      wmNativeChannelList.txt: |
+        # Add one webMethods native channel name per line
+        # Example: MyNativeChannel
+      wmNativeDurableList.txt: |
+        # Add channel and durable pairs separated by comma
+        # Format: channelName,durable1,durable2
+        # Example: MyChannel,Durable1,Durable2
+
 # Universal Messaging configuration
 um:
   startupCommand: "/opt/softwareag/UniversalMessaging/server/umserver/scripts/CreateInterfaces.sh {{ include \"common.names.fullname\" . }}-0 {{ .Values.service.port }} {{ .Values.service.UM_NSP_PORT }} {{ .Values.service.UM_NSPS_PORT }} {{ .Values.service.UM_NHP_PORT }} {{ .Values.service.UM_NHPS_PORT }}"
@@ -90,6 +118,24 @@ um:
   basicAuthMandatory: "No"
   logFramework: ""
 
+
+nameOverride: ""
+fullnameOverride: ""
+
+containerName:
+
+customServerConfig: 
+  content: |
+
+customMetricExporterConfig: 
+  content: |
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
 
 podSecurityContext: 
   fsGroup: 1724
@@ -113,7 +159,41 @@ storage:
   dataSize:          2Gi
   configurationSize: 2Mi
 
-# -- Configure startup probe
+  logs:
+    annotations: {}
+    storageClassName: ""
+  data:
+    annotations: {}
+    storageClassName: ""
+  configuration:
+    annotations: {}
+    storageClassName: ""
+  
+ingress:
+  enabled: false
+  defaultHostname: um.mydomain.com
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 9000
+  tls: []
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+topologySpreadConstraints: {}
+
+priorityClassName: ""
+
 startupProbe:
   httpGet:
     path: /health/
@@ -144,6 +224,18 @@ readinessProbe:
   successThreshold: 1
   failureThreshold: 3
 
+externalLoadBalancer: false
+
+# -- Define values for Prometheus Operator to scrap metrics via annotation or ServiceMonitor.
+prometheus:
+  path:          "/metrics"
+  port:          "9200"
+  scheme:        "http"
+  scrape:        "true"
+  interval:      10s
+  scrapeTimeout: 10s
+
+# -- Create and enable ServiceMonitor. The default is `false`.
 serviceMonitor:
   enabled: false
 
