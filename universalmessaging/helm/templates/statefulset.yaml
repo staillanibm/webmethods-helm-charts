@@ -54,13 +54,15 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
+        {{- if .Values.license }}
         - name: licence-xml
           configMap:
-            name: {{ .Values.licenseConfigMap }}            
+            name: {{ .Values.licenseConfigMap }}
             defaultMode: 420
             items:
             - key:  licensekey
               path: licence.xml
+        {{- end }}
         - name: jmx-exporter-config
           configMap:
             name: {{ include "common.names.fullname" . }}
@@ -107,10 +109,12 @@ spec:
             mountPath: /opt/softwareag/UniversalMessaging/server/umserver/logs
           - name: configuration
             mountPath: /opt/softwareag/common/conf
+          {{- if .Values.license }}
           - name: licence-xml
             mountPath: /opt/softwareag/UniversalMessaging/server/umserver/licence/licence.xml
             subPath:   licence.xml
             readOnly:  true
+          {{- end }}
           - name: jmx-exporter-config
             mountPath: /opt/softwareag/UniversalMessaging/server/umserver/bin/jmx_sag_um_exporter.yaml
             subPath:   jmx_sag_um_exporter.yaml

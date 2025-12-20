@@ -1,0 +1,136 @@
+# ==============================================================================
+# Universal Messaging SSL Certificates with cert-manager
+# ==============================================================================
+# This file creates SSL certificates for Universal Messaging using cert-manager.
+# The certificates support all four network interfaces: NSP, NSPS, NHP, NHPS
+#
+# Prerequisites:
+# - cert-manager v1.15+ installed in the cluster
+# - kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
+#
+# Usage:
+# 1. Create namespace: kubectl create namespace <namespace>
+# 2. Apply secrets: kubectl apply -f secrets.yaml -n <namespace>
+# 3. Apply certificates: kubectl apply -f certificates.yaml -n <namespace>
+# 4. Wait for ready: kubectl get certificates -n <namespace> -w
+# ==============================================================================
+
+---
+# ==============================================================================
+# STEP 1: Create Self-Signed Root CA Issuer
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: um-selfsigned-issuer
+spec:
+  selfSigned: {}
+
+---
+# ==============================================================================
+# STEP 2: Create CA Certificate (UM Root CA)
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: um-root-ca
+spec:
+  isCA: true
+  commonName: Universal Messaging Root CA
+  secretName: um-root-ca-secret
+  duration: 87600h      # 10 years
+  renewBefore: 720h     # 30 days
+  subject:
+    organizations:
+      - IBM webMethods
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: um-selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+
+---
+# ==============================================================================
+# STEP 3: Create CA Issuer
+# ==============================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: um-ca-issuer
+spec:
+  ca:
+    secretName: um-root-ca-secret
+
+---
+# ==============================================================================
+# STEP 4: Universal Messaging Server Certificate with JKS Keystores
+# ==============================================================================
+# This certificate is used for all SSL-enabled interfaces (NSPS, NHPS)
+# Generates both keystore.jks and truststore.jks automatically
+#
+# IMPORTANT: Update the following to match your Helm release name and namespace:
+# - metadata.name: <release-name>-tls
+# - secretName: <release-name>-ssl-certs
+# - commonName: <release-name>
+# - dnsNames: Update all occurrences of "universalmessaging" and "obstest"
+#
+# Example: If your Helm release is "um-prod" in namespace "production":
+#   secretName: um-prod-ssl-certs
+#   commonName: um-prod
+#   dnsNames:
+#     - um-prod-0
+#     - um-prod-0.production.svc.cluster.local
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: universalmessaging-tls
+spec:
+  secretName: universalmessaging-ssl-certs
+  commonName: universalmessaging
+  duration: 87600h      # 10 years
+  renewBefore: 720h     # 30 days
+  subject:
+    organizations:
+      - IBM webMethods
+  dnsNames:
+    # Service names for each replica
+    - universalmessaging-0
+    - universalmessaging-0.obstest
+    - universalmessaging-0.obstest.svc
+    - universalmessaging-0.obstest.svc.cluster.local
+    # Add more replicas if replicaCount > 1
+    # - universalmessaging-1
+    # - universalmessaging-1.obstest.svc.cluster.local
+    # Headless service
+    - universalmessaging
+    - universalmessaging.obstest
+    - universalmessaging.obstest.svc
+    - universalmessaging.obstest.svc.cluster.local
+    # Localhost for internal connections
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth
+  issuerRef:
+    name: um-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+  keystores:
+    jks:
+      create: true
+      passwordSecretRef:
+        name: um-keystore-password
+        key: password

@@ -1,0 +1,151 @@
+# Example values for Universal Messaging with end-to-end TLS security
+#
+# This file demonstrates how to deploy Universal Messaging using cert-manager generated certificates.
+#
+#
+# Prerequisites:
+# 1. Apply secrets.yaml
+# 2. Apply certificates.yaml
+# 3. Wait for certificates to be ready
+#
+# Usage:
+# helm install universalmessaging ../../helm -f values.yaml
+# helm upgrade universalmessaging ../../helm -f values.yaml
+
+# -- Number of replicas
+replicaCount: 1
+
+# ==============================================================================
+# Image Configuration
+# ==============================================================================
+
+image:
+  repository: ibmwebmethods.azurecr.io/universalmessaging-server
+  pullPolicy: Always
+  tag: "11.1.3"
+
+imagePullSecrets:
+  - name: regcred
+
+# ==============================================================================
+# Universal Messaging Configuration
+# ==============================================================================
+
+# -- SSL Configuration
+# Certificates are managed by cert-manager automatically.
+# See examples/e2e-security/ for deployment instructions.
+ssl:
+  useCertManager: true
+  keystorePasswordSecret: "changeit"
+  truststorePasswordSecret: "changeit"
+
+# -- Extra environment properties to be passed on to the container
+extraEnvs:
+  SSL_KEYSTORE: "/opt/softwareag/common/conf/keystore.jks"
+  SSL_KEYSTORE_PASS: "changeit"
+  SSL_TRUSTSTORE: "/opt/softwareag/common/conf/truststore.jks"
+  SSL_TRUSTSTORE_PASS: "changeit"
+
+# -- Extra volumes that should be mounted.
+extraVolumes: |
+  - name: assets-conf
+    configMap:
+      name: assets-conf
+      defaultMode: 0644
+  - name: scripts-conf
+    configMap:
+      name: scripts-conf
+      defaultMode: 0755
+  - name: ssl-certs
+    secret:
+      secretName: {{ include "common.names.fullname" . }}-ssl-certs
+      defaultMode: 0644
+
+# -- Extra volume mounts
+extraVolumeMounts: |
+  - name: assets-conf
+    mountPath: /opt/softwareag/UniversalMessaging/server/umserver/assets
+    readOnly: false
+  - name: scripts-conf
+    mountPath: /opt/softwareag/UniversalMessaging/server/umserver/scripts
+    readOnly: false
+  - name: ssl-certs
+    mountPath: /opt/softwareag/common/conf/keystore.jks
+    subPath: keystore.jks
+    readOnly: true
+  - name: ssl-certs
+    mountPath: /opt/softwareag/common/conf/truststore.jks
+    subPath: truststore.jks
+    readOnly: true
+
+# Universal Messaging configuration
+um:
+  startupCommand: "/opt/softwareag/UniversalMessaging/server/umserver/scripts/CreateInterfaces.sh {{ include \"common.names.fullname\" . }}-0 {{ .Values.service.port }} {{ .Values.service.UM_NSP_PORT }} {{ .Values.service.UM_NSPS_PORT }} {{ .Values.service.UM_NHP_PORT }} {{ .Values.service.UM_NHPS_PORT }}"
+  realmName: ""
+  initJavaMemSize: "1024"
+  maxJavaMemSize: "1024"
+  maxDirectMemSize: "1G"
+
+  basicAuthEnable: "No"
+  basicAuthMandatory: "No"
+  logFramework: ""
+
+
+podSecurityContext: 
+  fsGroup: 1724
+  
+service:
+  type:       ClusterIP
+  # -- Universal Messaging default port
+  port:       9000
+  # -- Metrics port
+  metricPort: 9200
+  
+  # Additional Ports
+  UM_HOST: localhost  # or your service name
+  UM_NSP_PORT: "9001"
+  UM_NSPS_PORT: "9002"
+  UM_NHP_PORT: "19001"
+  UM_NHPS_PORT: "19002"
+
+storage:
+  logsSize:          2Gi
+  dataSize:          2Gi
+  configurationSize: 2Mi
+
+# -- Configure startup probe
+startupProbe:
+  httpGet:
+    path: /health/
+    port: 9000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 30
+
+livenessProbe:
+  httpGet:
+    path: /health/
+    port: 9000
+  initialDelaySeconds: 0
+  periodSeconds: 15
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/
+    port: 9000
+  initialDelaySeconds: 0
+  periodSeconds: 15
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+serviceMonitor:
+  enabled: false
+
+# -- Import the content as license key and create a ConfigMap named by `licenseConfigMap` value. You can copy/past the content of your provided license key file here.
+license: |
