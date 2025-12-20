@@ -8,11 +8,11 @@ replicaCount: 1
 # -- Run this image
 image:
   # -- Pull this image. Default is UM from [IBM webMethods Container Registry](https://containers.webmethods.io)
-  repository: ibmwebmethods.azurecr.io/universalmessaging-server
+  repository: sagcr.azurecr.io/universalmessaging-server
   # -- Pull with policy
   pullPolicy: Always
   # -- The default value pulls latest. In PROD it is recommended to use a specific fix level.
-  tag: "11.1.3"
+  tag: "10.15"
 
 # -- Name of the licence config map
 licenseConfigMap: "universalmessaging-license-key"

@@ -20,6 +20,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := printf "%s-0" (include "common.names.fullname" .) -}}
 {{- $svcPort := .Values.service.port -}}
+{{- $defaultPort := .Values.service.port -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
@@ -73,10 +74,10 @@ spec:
               service:
                 name: {{ $fullName }}
                 port:
-                  number: {{ $svcPort }}
+                  number: {{ .port | default $defaultPort }}
               {{- else }}
               serviceName: {{ $fullName }}
-              servicePort: {{ $svcPort }}
+              servicePort: {{ .port | default $defaultPort }}
               {{- end }}
           {{- end }}
     {{- end }}

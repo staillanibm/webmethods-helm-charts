@@ -1,199 +1,46 @@
-# Example values for Universal Messaging with end-to-end TLS security
-#
-# This file demonstrates how to deploy Universal Messaging using cert-manager generated certificates.
-#
-#
-# Prerequisites:
-# 1. Apply secrets.yaml
-# 2. Apply certificates.yaml
-# 3. Wait for certificates to be ready
-#
-# Usage:
-# helm install universalmessaging ../../helm -f values.yaml
-# helm upgrade universalmessaging ../../helm -f values.yaml
+# TLS environment variables
+# These paths reference the cert-manager generated keystores
+extraEnvs:
+  TLS_KEYSTORE: "/opt/softwareag/common/conf/keystore.jks"
+  TLS_KEYSTORE_PASS:
+    valueFrom:
+      secretKeyRef:
+        name: um-keystore-password
+        key: password
+  TLS_TRUSTSTORE: "/opt/softwareag/common/conf/truststore.jks"
+  TLS_TRUSTSTORE_PASS:
+    valueFrom:
+      secretKeyRef:
+        name: um-truststore-password
+        key: password
+  # Client Certificate Authentication (mTLS)
+  # Set to "true" to require client certificates, "false" to allow connections without client certs
+  NSPS_CLIENT_CERT_REQUIRED: "false"
+  NHPS_CLIENT_CERT_REQUIRED: "false"
 
-# -- Number of replicas
+# Number of replicas (if >1, update DNS names in certificates.yaml)
 replicaCount: 1
 
-# ==============================================================================
-# Image Configuration
-# ==============================================================================
-
+# Image configuration
 image:
   repository: ibmwebmethods.azurecr.io/universalmessaging-server
   pullPolicy: Always
   tag: "11.1.3"
 
+# Image pull secret
 imagePullSecrets:
   - name: regcred
 
-# ==============================================================================
-# Universal Messaging Configuration
-# ==============================================================================
-
-# -- SSL Configuration
-# Certificates are managed by cert-manager automatically.
-# See examples/e2e-security/ for deployment instructions.
-ssl:
-  useCertManager: true
-  keystorePasswordSecret: "changeit"
-  truststorePasswordSecret: "changeit"
-
-# -- Extra environment properties to be passed on to the container
-extraEnvs:
-  SSL_KEYSTORE: "/opt/softwareag/common/conf/keystore.jks"
-  SSL_KEYSTORE_PASS: "changeit"
-  SSL_TRUSTSTORE: "/opt/softwareag/common/conf/truststore.jks"
-  SSL_TRUSTSTORE_PASS: "changeit"
-
-# -- Extra volumes that should be mounted.
-extraVolumes: |
-  - name: assets-conf
-    configMap:
-      name: assets-conf
-      defaultMode: 0644
-  - name: scripts-conf
-    configMap:
-      name: scripts-conf
-      defaultMode: 0755
-  - name: ssl-certs
-    secret:
-      secretName: {{ include "common.names.fullname" . }}-ssl-certs
-      defaultMode: 0644
-
-# -- Extra volume mounts
-extraVolumeMounts: |
-  - name: assets-conf
-    mountPath: /opt/softwareag/UniversalMessaging/server/umserver/assets
-    readOnly: false
-  - name: scripts-conf
-    mountPath: /opt/softwareag/UniversalMessaging/server/umserver/scripts
-    readOnly: false
-  - name: ssl-certs
-    mountPath: /opt/softwareag/common/conf/keystore.jks
-    subPath: keystore.jks
-    readOnly: true
-  - name: ssl-certs
-    mountPath: /opt/softwareag/common/conf/truststore.jks
-    subPath: truststore.jks
-    readOnly: true
-
-# -- Extra config maps for additional configurations such as extra ports, etc.
-extraConfigMaps:
-  - metadata:
-      name: assets-conf
-    data:
-      connectionFactoryList.txt: |
-        # Add one connection factory name per line
-        # Example: myConnectionFactory
-      jmsChannelList.txt: |
-        # Add one JMS queue name per line
-        # Example: MyJMSQueue
-      jmsTopicList.txt: |
-        # Add one JMS topic name per line
-        # Example: MyJMSTopic
-      queueConnectionFactoryList.txt: |
-        # Add one queue connection factory name per line
-        # Example: myQueueConnectionFactory
-      topicConnectionFactoryList.txt: |
-        # Add one topic connection factory name per line
-        # Example: myTopicConnectionFactory
-      wmNativeChannelList.txt: |
-        # Add one webMethods native channel name per line
-        # Example: MyNativeChannel
-      wmNativeDurableList.txt: |
-        # Add channel and durable pairs separated by comma
-        # Format: channelName,durable1,durable2
-        # Example: MyChannel,Durable1,Durable2
-
 # Universal Messaging configuration
 um:
-  startupCommand: "/opt/softwareag/UniversalMessaging/server/umserver/scripts/CreateInterfaces.sh {{ include \"common.names.fullname\" . }}-0 {{ .Values.service.port }} {{ .Values.service.UM_NSP_PORT }} {{ .Values.service.UM_NSPS_PORT }} {{ .Values.service.UM_NHP_PORT }} {{ .Values.service.UM_NHPS_PORT }}"
+  # Startup command to initialize UM server
+  startupCommand: "/opt/scripts/startup.sh"
   realmName: ""
   initJavaMemSize: "1024"
-  maxJavaMemSize: "1024"
+  maxJavaMemSize: "2048"
   maxDirectMemSize: "1G"
 
-  basicAuthEnable: "No"
-  basicAuthMandatory: "No"
-  logFramework: ""
-
-
-nameOverride: ""
-fullnameOverride: ""
-
-containerName:
-
-customServerConfig: 
-  content: |
-
-customMetricExporterConfig: 
-  content: |
-
-serviceAccount:
-  create: false
-  annotations: {}
-  name: ""
-
-podAnnotations: {}
-
-podSecurityContext: 
-  fsGroup: 1724
-  
-service:
-  type:       ClusterIP
-  # -- Universal Messaging default port
-  port:       9000
-  # -- Metrics port
-  metricPort: 9200
-  
-  # Additional Ports
-  UM_HOST: localhost  # or your service name
-  UM_NSP_PORT: "9001"
-  UM_NSPS_PORT: "9002"
-  UM_NHP_PORT: "19001"
-  UM_NHPS_PORT: "19002"
-
-storage:
-  logsSize:          2Gi
-  dataSize:          2Gi
-  configurationSize: 2Mi
-
-  logs:
-    annotations: {}
-    storageClassName: ""
-  data:
-    annotations: {}
-    storageClassName: ""
-  configuration:
-    annotations: {}
-    storageClassName: ""
-  
-ingress:
-  enabled: false
-  defaultHostname: um.mydomain.com
-  className: ""
-  annotations: {}
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: Prefix
-          port: 9000
-  tls: []
-
-resources: {}
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-topologySpreadConstraints: {}
-
-priorityClassName: ""
-
+# Health probes using default NHP port (HTTP protocol)
 startupProbe:
   httpGet:
     path: /health/
@@ -224,20 +71,260 @@ readinessProbe:
   successThreshold: 1
   failureThreshold: 3
 
-externalLoadBalancer: false
+# Service configuration - Expose TLS interfaces
+service:
+  extraPorts:
+    - name: nsp-tcp
+      port: 19100
+      protocol: TCP
+    - name: nsps-tls
+      port: 19443
+      protocol: TCP
+    - name: nhps-https
+      port: 19001
+      protocol: TCP
 
-# -- Define values for Prometheus Operator to scrap metrics via annotation or ServiceMonitor.
-prometheus:
-  path:          "/metrics"
-  port:          "9200"
-  scheme:        "http"
-  scrape:        "true"
-  interval:      10s
-  scrapeTimeout: 10s
+# Storage configuration
+storage:
+  logsSize: 2Gi
+  dataSize: 2Gi
+  configurationSize: 2Mi
 
-# -- Create and enable ServiceMonitor. The default is `false`.
+# Ingress configuration for NHPS (HTTPS with TLS passthrough)
+# This exposes the NHPS interface (port 19001) via Ingress with TLS passthrough
+# Note: TLS passthrough requires nginx ingress controller with --enable-ssl-passthrough flag
+#
+# IMPORTANT: With TLS passthrough, the UM server presents its certificate directly to clients.
+# Therefore, the ingress hostname (defaultHostname) MUST be included in the certificate's
+# Subject Alternative Names (SANs). Update certificates.yaml to add this hostname to dnsNames.
+ingress:
+  enabled: true  # Set to true to enable ingress
+  defaultHostname: um.sttlab.local
+  className: "nginx"
+  annotations:
+    # Enable TLS passthrough - the ingress will NOT terminate TLS
+    # The TLS connection goes directly to the UM NHPS interface
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  hosts:
+    - host: ""  # Uses defaultHostname
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 19001  # NHPS port
+  # Note: No 'tls:' section needed with ssl-passthrough
+  # The TLS connection goes directly to the UM NHPS interface
+  tls: []
+
+# Optional: Enable service monitor for Prometheus
 serviceMonitor:
   enabled: false
 
-# -- Import the content as license key and create a ConfigMap named by `licenseConfigMap` value. You can copy/past the content of your provided license key file here.
-license: |
+# Extra ConfigMaps - Startup script for UM initialization
+extraConfigMaps:
+  - metadata:
+      name: scripts-conf
+      labels:
+        app: universalmessaging
+    data:
+      startup.sh: |
+        #!/bin/sh
+        #
+        # Universal Messaging startup initialization script
+        # Waits for UM server to be ready, then configures interfaces
+        #
+
+        # Configuration
+        UM_HOST="localhost"
+        UM_DEFAULT_PORT="9000"
+        NSP_PORT="19100"
+        NSPS_PORT="19443"
+        NHP_PORT=""  # Skip, using default 9000
+        NHPS_PORT="19001"
+
+        # TLS Configuration
+        TLS_KEYSTORE="${TLS_KEYSTORE:-/opt/softwareag/common/conf/keystore.jks}"
+        TLS_KEYSTORE_PASS="${TLS_KEYSTORE_PASS:-changeit}"
+        TLS_TRUSTSTORE="${TLS_TRUSTSTORE:-/opt/softwareag/common/conf/truststore.jks}"
+        TLS_TRUSTSTORE_PASS="${TLS_TRUSTSTORE_PASS:-changeit}"
+
+        # Client Certificate Authentication (mTLS)
+        # Set to "true" to require client certificates, "false" to allow connections without client certs
+        NSPS_CLIENT_CERT_REQUIRED="${NSPS_CLIENT_CERT_REQUIRED:-false}"
+        NHPS_CLIENT_CERT_REQUIRED="${NHPS_CLIENT_CERT_REQUIRED:-false}"
+
+        echo "==================================================================="
+        echo "Universal Messaging Startup Initialization"
+        echo "==================================================================="
+
+        # Wait for UM server to be ready (max 30 seconds)
+        echo "Waiting for UM server to be ready..."
+        RETRY_COUNT=0
+        MAX_RETRIES=30
+        REALM_URL="nsp://${UM_HOST}:${UM_DEFAULT_PORT}"
+
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+          if runUMTool.sh ListInterfaces -rname=$REALM_URL > /dev/null 2>&1; then
+            echo "UM server is ready!"
+            break
+          fi
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          echo "Waiting... attempt $RETRY_COUNT/$MAX_RETRIES"
+          sleep 1
+        done
+
+        if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+          echo "ERROR: UM server failed to become ready within 30 seconds"
+          exit 1
+        fi
+
+        # Function to check if interface exists
+        interface_exists() {
+          local port=$1
+          runUMTool.sh ListInterfaces -rname=$REALM_URL 2>/dev/null | grep -q "port=$port"
+          return $?
+        }
+
+        # Function to create or update NSP interface (TCP socket)
+        create_nsp_interface() {
+          local port=$1
+          if [ -z "$port" ] || [ "$port" = "null" ]; then
+            return 0
+          fi
+
+          echo "-------------------------------------------------------------------"
+          echo "Configuring NSP (Socket) interface on port $port..."
+
+          if interface_exists "$port"; then
+            echo "NSP interface on port $port already exists, skipping"
+          else
+            echo "Creating NSP interface on port $port..."
+            if runUMTool.sh AddSocketInterface -rname=$REALM_URL -adapter=0.0.0.0 -port=$port -autostart=true; then
+              echo "NSP interface created successfully"
+            else
+              echo "WARNING: Failed to create NSP interface"
+            fi
+          fi
+        }
+
+        # Function to create or update NSPS interface (SSL socket)
+        create_nsps_interface() {
+          local port=$1
+          if [ -z "$port" ] || [ "$port" = "null" ]; then
+            return 0
+          fi
+
+          echo "-------------------------------------------------------------------"
+          echo "Configuring NSPS (SSL Socket) interface on port $port..."
+          echo "  Client Certificate Required: $NSPS_CLIENT_CERT_REQUIRED"
+
+          if interface_exists "$port"; then
+            echo "NSPS interface on port $port already exists, skipping"
+          else
+            echo "Creating NSPS interface on port $port..."
+            if runUMTool.sh AddSSLInterface -rname=$REALM_URL -adapter=0.0.0.0 -port=$port \
+              -keystore=$TLS_KEYSTORE -kspassword=$TLS_KEYSTORE_PASS \
+              -truststore=$TLS_TRUSTSTORE -tspassword=$TLS_TRUSTSTORE_PASS \
+              -clientcertrequired=$NSPS_CLIENT_CERT_REQUIRED \
+              -autostart=true; then
+              echo "NSPS interface created successfully"
+            else
+              echo "WARNING: Failed to create NSPS interface"
+            fi
+          fi
+        }
+
+        # Function to create or update NHP interface (HTTP)
+        create_nhp_interface() {
+          local port=$1
+          if [ -z "$port" ] || [ "$port" = "null" ] || [ "$port" = "$UM_DEFAULT_PORT" ]; then
+            return 0
+          fi
+
+          echo "-------------------------------------------------------------------"
+          echo "Configuring NHP (HTTP) interface on port $port..."
+
+          if interface_exists "$port"; then
+            echo "NHP interface on port $port already exists, skipping"
+          else
+            echo "Creating NHP interface on port $port..."
+            if runUMTool.sh AddHTTPInterface -rname=$REALM_URL -adapter=0.0.0.0 -port=$port -autostart=true; then
+              echo "NHP interface created successfully"
+            else
+              echo "WARNING: Failed to create NHP interface"
+            fi
+          fi
+        }
+
+        # Function to create or update NHPS interface (HTTPS)
+        create_nhps_interface() {
+          local port=$1
+          if [ -z "$port" ] || [ "$port" = "null" ]; then
+            return 0
+          fi
+
+          echo "-------------------------------------------------------------------"
+          echo "Configuring NHPS (HTTPS) interface on port $port..."
+          echo "  Client Certificate Required: $NHPS_CLIENT_CERT_REQUIRED"
+
+          if interface_exists "$port"; then
+            echo "NHPS interface on port $port already exists, skipping"
+          else
+            echo "Creating NHPS interface on port $port..."
+            if runUMTool.sh AddHTTPSInterface -rname=$REALM_URL -adapter=0.0.0.0 -port=$port \
+              -keystore=$TLS_KEYSTORE -kspassword=$TLS_KEYSTORE_PASS \
+              -truststore=$TLS_TRUSTSTORE -tspassword=$TLS_TRUSTSTORE_PASS \
+              -clientcertrequired=$NHPS_CLIENT_CERT_REQUIRED \
+              -autostart=true; then
+              echo "NHPS interface created successfully"
+            else
+              echo "WARNING: Failed to create NHPS interface"
+            fi
+          fi
+        }
+
+        # Create interfaces
+        echo "==================================================================="
+        echo "Configuring Universal Messaging Interfaces"
+        echo "==================================================================="
+
+        create_nsp_interface "$NSP_PORT"
+        create_nsps_interface "$NSPS_PORT"
+        create_nhp_interface "$NHP_PORT"
+        create_nhps_interface "$NHPS_PORT"
+
+        echo "==================================================================="
+        echo "Listing all configured interfaces:"
+        runUMTool.sh ListInterfaces -rname=$REALM_URL
+
+        echo "==================================================================="
+        echo "Universal Messaging initialization completed successfully"
+        echo "==================================================================="
+
+# Mount the scripts ConfigMap and TLS certificates
+extraVolumes:
+  - name: scripts
+    configMap:
+      name: scripts-conf
+      defaultMode: 0755
+  - name: tls-certs
+    secret:
+      secretName: universalmessaging-tls-certs
+      items:
+        - key: keystore.jks
+          path: keystore.jks
+        - key: truststore.jks
+          path: truststore.jks
+
+extraVolumeMounts:
+  - name: scripts
+    mountPath: /opt/scripts
+    readOnly: true
+  - name: tls-certs
+    mountPath: /opt/softwareag/common/conf/keystore.jks
+    subPath: keystore.jks
+    readOnly: true
+  - name: tls-certs
+    mountPath: /opt/softwareag/common/conf/truststore.jks
+    subPath: truststore.jks
+    readOnly: true

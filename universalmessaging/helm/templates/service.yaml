@@ -41,4 +41,12 @@ spec:
       targetPort: 9200
       protocol: TCP
       name: metric
+    {{- if $.Values.service.extraPorts }}
+    {{- range $.Values.service.extraPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .port }}
+      protocol: {{ .protocol | default "TCP" }}
+      name: {{ .name }}
+    {{- end }}
+    {{- end }}
 {{- end }}

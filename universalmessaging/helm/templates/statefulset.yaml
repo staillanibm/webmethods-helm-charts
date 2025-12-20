@@ -157,7 +157,11 @@ spec:
           {{- if .Values.extraEnvs }}
           {{- range $key, $val := .Values.extraEnvs }}
           - name: {{ $key }}
-            value: {{ $val }}
+            {{- if kindIs "string" $val }}
+            value: {{ $val | quote }}
+            {{- else }}
+            {{- toYaml $val | nindent 12 }}
+            {{- end }}
           {{- end }}
           {{- end }}
           {{- if .Values.lifecycle }}
