@@ -99,7 +99,8 @@ spec:
       - IBM webMethods
   dnsNames:
     # Ingress hostname (for TLS passthrough)
-    - um.sttlab.local
+    # - um.sttlab.local
+    - um-integration.apps.itz-q037mu.infra01-lb.fra02.techzone.ibm.com
     # Service names for each replica
     - universalmessaging-0
     - universalmessaging-0.integration

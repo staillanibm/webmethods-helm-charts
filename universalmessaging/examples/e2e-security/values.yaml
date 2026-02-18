@@ -18,6 +18,14 @@ extraEnvs:
   NSPS_CLIENT_CERT_REQUIRED: "false"
   NHPS_CLIENT_CERT_REQUIRED: "false"
 
+# Service account
+# OCP privileges for this SA: oc adm policy add-scc-to-user nonroot-v2 -z um-sa -n integration
+serviceAccount:
+  create: true
+  name: um-sa
+  annotations: {}
+serviceAccountName: um-sa
+
 # Number of replicas (if >1, update DNS names in certificates.yaml)
 replicaCount: 1
 
@@ -98,7 +106,7 @@ storage:
 # Therefore, the ingress hostname (defaultHostname) MUST be included in the certificate's
 # Subject Alternative Names (SANs). Update certificates.yaml to add this hostname to dnsNames.
 ingress:
-  enabled: true  # Set to true to enable ingress
+  enabled: false  # Set to true to enable ingress
   defaultHostname: um.sttlab.local
   className: "nginx"
   annotations:
