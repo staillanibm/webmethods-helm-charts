@@ -1,5 +1,5 @@
 # /*
-#  * Copyright (c) 2024 IBM Corporation
+#  * Copyright (c) 2026 IBM Corporation
 #  *
 #  * SPDX-License-Identifier: Apache-2.0
 #  *
@@ -17,8 +17,8 @@
 #  *
 #  */
 apiVersion: v2
-name: apicontrolplane
-description: API Control Plane Helm Chart for Kubernetes
+name: terracotta
+description: Terracotta Helm Chart for Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -33,7 +33,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.2.0
+version: "1.0.1"
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -41,8 +41,8 @@ version: 1.2.0
 appVersion: "11.1"
 
 dependencies:
-- name: common
-  repository: "https://ibm.github.io/webmethods-helm-charts/charts"
-  tags:
-    - softwareag-common
-  version: 1.0.3
+  - name: common
+    repository: "https://ibm.github.io/webmethods-helm-charts/charts"
+    tags:
+      - webmethods-common
+    version: 2.0.0

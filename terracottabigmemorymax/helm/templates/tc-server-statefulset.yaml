@@ -19,7 +19,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: terracotta
+  name: {{ include "common.names.fullname" . }}-terracotta
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     {{- with .Values.extraLabels -}}
@@ -32,7 +32,7 @@ spec:
   selector:
     matchLabels:
       app: terracotta
-  serviceName: terracotta-service
+  serviceName: {{ include "common.names.fullname" . }}-terracotta-service
   template:
     metadata:
       labels:
@@ -47,9 +47,17 @@ spec:
       {{- if .Values.terracotta.serviceAccountName }}
       serviceAccount: {{ .Values.terracotta.serviceAccountName }}
      {{- end }}
+      {{- with .Values.tsaServer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tsaServer.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: server
-          image: "{{ $.Values.registry }}/{{ $.Values.serverImage }}:{{ $.Values.tag | default .Chart.AppVersion }}"
+          image: "{{ $.Values.serverImage }}:{{ $.Values.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ $.Values.pullPolicy | quote }}
 
           startupProbe:
@@ -64,16 +72,16 @@ spec:
           {{- end }}
           volumeMounts:
             - name: commonconfig-volume
-              mountPath: /opt/softwareag/config
-            - name: core-store
-              mountPath: /opt/softwareag/run
+              mountPath: /opt/terracotta/config
+            - name: {{ include "common.names.fullname" . }}-core-store
+              mountPath: /opt/terracotta/run
           env:
             - name: JSON_LOGGING
               value: {{ $.Values.terracotta.jsonLogging | quote }}
             {{- if eq $.Values.terracotta.security true }}
             {{- if eq $.Values.terracotta.selfSignedCerts true }}
             - name: JAVA_OPTS
-              value: {{ $.Values.terracotta.serverOpts }} -Djavax.net.ssl.trustStore=/opt/softwareag/run/truststore.jks
+              value: {{ $.Values.terracotta.serverOpts }} -Djavax.net.ssl.trustStore=/opt/terracotta/run/truststore.jks
             {{- else }} 
             {{- if ne $.Values.terracotta.serverOpts "" }}
             - name: JAVA_OPTS
@@ -85,10 +93,11 @@ spec:
             - name: JAVA_OPTS
               value: {{ $.Values.terracotta.serverOpts }}
             {{- end }}
-            {{- end }} 
-            {{- if .Values.extraEnvs }}
-            {{- toYaml .Values.extraEnvs | nindent 12 }}
-            {{- end }}                   
+            {{- end }}
+            {{- range $key, $val := .Values.extraEnvs }}
+            - name: {{ $key }}
+              value: {{ $val }}
+            {{- end }}
       volumes:
         - name: commonconfig-volume
           projected:
@@ -101,7 +110,7 @@ spec:
                 {{- end }}
   volumeClaimTemplates:
     - metadata:
-        name: core-store
+        name: {{ include "common.names.fullname" . }}-core-store
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:

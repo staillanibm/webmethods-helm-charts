@@ -3,16 +3,17 @@
 # Change this for air-gaped installations or custom images.
 # For the IBM webMethods container repository you need to have a
 # valid access token stored as registry credentials
-registry: sagcr.azurecr.io
-serverImage: bigmemorymax-server
-tmcImage: bigmemorymax-management-server
+serverImage: ibmwebmethods.azurecr.io/bigmemorymax-server
+tmcImage: ibmwebmethods.azurecr.io/bigmemorymax-management-server
 pullPolicy: IfNotPresent
 # -- Specific version to not accidentally change production versions with newer images.
-tag: "4.4.0"
+tag: "4.5.0"
 
 # -- Image pull secret reference. By default looks for `regcred`.
 imagePullSecrets:
   - name: regcred
+
+fullnameOverride: ""
 
 #
 # BELOW ARE THE CONFIGURATIONS FOR THE PODS
@@ -27,10 +28,10 @@ securityContext:
 # -- Extra Labels
 extraLabels: {}
 
-# -- Exta environment properties to be passed on to the terracotta runtime
-#  - name: extraEnvironmentVariable
-#    value: "myvalue"
-extraEnvs: []
+# extraEnvs:
+#   name: extraEnvironmentVariable
+#   value: "myvalue"
+extraEnvs:
 
 # -- The pvc storage request for the server pods
 serverStorage: 10Gi
@@ -111,6 +112,12 @@ tsaServer:
     timeoutSeconds: 5
     failureThreshold: 3 
 
+  # -- Configure pod affinity for terracotta servers
+  affinity:
+
+  # -- Configure pod topologySpreadConstraints for terracotta servers
+  topologySpreadConstraints:
+
 # -- TMC-specific configurations for probes
 tmcServer:
   # -- Configure startup probe
@@ -142,6 +149,12 @@ tmcServer:
     successThreshold: 1
     timeoutSeconds: 5
     failureThreshold: 3
+
+  # -- Configure pod affinity for tms server
+  affinity:
+
+  # -- Configure pod topologySpreadConstraints for tms server
+  topologySpreadConstraints:
 
 # -- Define values for Prometheus Operator to scrap metrics via ServiceMonitor.
 prometheus:
